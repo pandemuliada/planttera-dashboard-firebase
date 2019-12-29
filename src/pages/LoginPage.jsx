@@ -46,7 +46,7 @@ const LoginPage = ({ history }) => {
     <div className='w-full flex items-center h-screen bg-blue-200'>
       <div className='flex items-center mx-auto bg-white rounded-lg shadow-lg' style={{ width: 1200, maxWidth: 1200 }}>
         <div className='h-full w-1/2 p-24 bg-gray-100 rounded-tl-lg rounded-bl-lg'>
-          <img src={BusinessVector} className="block mr-32 w-full"/>
+          <img src={BusinessVector} alt='Login Vector' className="block mr-32 w-full"/>
         </div>
         <div className='w-1/2 p-12'>
           <div className='bg-white p-12 rounded'>

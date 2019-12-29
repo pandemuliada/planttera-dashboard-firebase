@@ -2,7 +2,7 @@ import React from 'react'
 import { FiHome, FiBox, FiLogOut } from 'react-icons/fi'
 import { cn } from '../utils/format'
 import { auth } from '../firebase'
-import { withRouter, Redirect, NavLink } from 'react-router-dom'
+import { withRouter, NavLink } from 'react-router-dom'
 
 const sideNavStyles = {
   title: {
