@@ -56,8 +56,8 @@ const TextField = React.forwardRef((props, ref) => {
   }
 
   return (<div className={cn(styles.wrapper)}>
-    {label && <span className={cn(styles.label)}>{label}</span>}
-    <input ref={ref} className={cn(styles.input)} type={type} {...rest}/>
+    {label && <label htmlFor={rest.name} className={cn(styles.label)}>{label}</label>}
+    <input ref={ref} id={rest.name} className={cn(styles.input)} type={type} {...rest}/>
     {touched && error && <span className={cn(styles.errorMessage)}>{error}</span>}
   </div>)
 })

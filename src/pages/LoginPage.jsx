@@ -3,7 +3,7 @@ import { Formik } from 'formik'
 import { object, string } from 'yup'
 import { auth } from '../firebase'
 import { useCurrentUser } from '../contexts/AuthContext'
-import { withRouter, Redirect } from 'react-router'
+import { Redirect, useHistory } from 'react-router'
 
 import { FormikTextField } from '../components/inputs'
 import { Button } from '../components/buttons'
@@ -20,12 +20,14 @@ const loginValidation = object().shape({
   password: string().required('Please enter your password'),
 }) 
 
-const LoginPage = ({ history }) => {
+const LoginPage = () => {
+  let history = useHistory()
+
   const currentUser = useCurrentUser()
   const [isFailed, setIsFailed] = useState(false)
 
   if(!!currentUser) {
-    return <Redirect to='/' />
+    return <Redirect to='/dashboard' />
   }
 
   async function login(values) {
@@ -34,7 +36,7 @@ const LoginPage = ({ history }) => {
     try {
       const user = await auth.signInWithEmailAndPassword(email, password)
       if (user) { 
-        history.push('/')
+        history.push('/dashboard')
         setIsFailed(false)
       }
     } catch (error) {
@@ -43,8 +45,8 @@ const LoginPage = ({ history }) => {
   }
 
   return(<>
-    <div className='w-full flex items-center h-screen bg-blue-200'>
-      <div className='flex items-center mx-auto bg-white rounded-lg shadow-lg' style={{ width: 1200, maxWidth: 1200 }}>
+    <div className='w-full flex items-center h-screen bg-teal-400'>
+      <div className='flex items-center mx-auto bg-white rounded-lg shadow-xl' style={{ width: 1200, maxWidth: 1200 }}>
         <div className='h-full w-1/2 p-24 bg-gray-100 rounded-tl-lg rounded-bl-lg'>
           <img src={BusinessVector} alt='Login Vector' className="block mr-32 w-full"/>
         </div>
@@ -53,7 +55,7 @@ const LoginPage = ({ history }) => {
             <Formik initialValues={initialValues} onSubmit={login} validationSchema={loginValidation}>
               {({ handleSubmit, isSubmitting, isValid }) => {
                 return (<form onSubmit={handleSubmit}>
-                  <h1 className='text-4xl text-blue-500 mb-8 font-bold'>Login to Dashboard</h1>
+                  <h1 className='text-4xl text-teal-500 mb-8 font-bold'>Login to Dashboard</h1>
                   {isFailed && <p className='text-red-500 mb-5 italic'>Login failed, <br/> Please check your email & password</p>}
 
                   <FormikTextField type='email' label='Email' name='email' placeholder='useremail@mail.com' />
@@ -70,4 +72,4 @@ const LoginPage = ({ history }) => {
     </div>
   </>)
 }
-export default withRouter(LoginPage)
+export default LoginPage
