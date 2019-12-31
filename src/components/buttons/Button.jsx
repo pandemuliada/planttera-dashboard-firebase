@@ -1,5 +1,5 @@
 import React from 'react'
-import { buttonColors, buttonIcons } from './theme'
+import { buttonColors, buttonIcons, buttonSizes } from './theme'
 import ReactLoading from 'react-loading'
 
 import { cn } from '../../utils/format'
@@ -13,6 +13,7 @@ const Button = (props) => {
     loading=false,
     icon,
     block,
+    size='normal',
     ...rest
   } = props
 
@@ -21,13 +22,14 @@ const Button = (props) => {
   const styles = {
     button: {
       default: [
-        'flex',
+        icon && 'flex',
         'items-center',
         'justify-center',
-        'px-4 py-2',
         'rounded',
         'text-white',
         'border-2',
+        'transition-all',
+        size ? buttonSizes[size] : buttonSizes['normal'], 
         block ? 'w-full block' : 'w-auto',
         disabled ? 'opacity-50' : 'opacity-100',
         disabled ? 'cursor-not-allowed' : 'cursor-pointer',
