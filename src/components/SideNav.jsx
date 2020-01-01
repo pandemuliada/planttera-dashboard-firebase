@@ -72,8 +72,8 @@ const Item = (props) => {
         'block',
         'w-full',
         'rounded',
-        'py-3',
-        'px-5',
+        'py-2',
+        'px-4',
         'mb-2',
         'transition-all',
         match ? 'bg-teal-400 text-white font-medium shadow' : 'text-gray-500'
@@ -88,7 +88,7 @@ const Item = (props) => {
     },
     childItem: {
       default: [
-        'py-3',
+        'py-2',
         'px-4',
         'block',
         'text-gray-500',

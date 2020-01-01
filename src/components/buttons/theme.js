@@ -7,6 +7,13 @@ const buttonColors = {
     default: `${colors.primary}-400`,
     hover: `${colors.primary}-500`,
     disabled: `${colors.primary}-400`,
+    outline: `${colors.primary}-100`
+  },
+  secondary: {
+    default: `${colors.secondary}-400`,
+    hover: `${colors.secondary}-500`,
+    disabled: `${colors.secondary}-400`,
+    outline: `${colors.secondary}-100`
   },
   danger: {
     default: `${colors.danger}-400`,
