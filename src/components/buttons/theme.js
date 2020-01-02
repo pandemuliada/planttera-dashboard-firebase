@@ -19,6 +19,7 @@ const buttonColors = {
     default: `${colors.danger}-400`,
     hover: `${colors.danger}-500`,
     disabled: `${colors.danger}-400`,
+    outline: `${colors.danger}-100`
   }
 }
 

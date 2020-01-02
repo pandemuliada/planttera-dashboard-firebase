@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
+import { IoIosCreate, IoIosTrash } from 'react-icons/io'
 import { db } from '../firebase'
 import Table from '../components/Table'
 import { TextField } from '../components/inputs'
 import { Button } from '../components/buttons'
 import Panel from '../components/Panel'
-import { IoIosCreate, IoIosTrash } from 'react-icons/io'
 import CategoryForm from '../components/forms/CategoryForm'
+import { ConfirmationDialog } from '../components/Dialog'
 
 const CategoryPage = () => {
   const [tableData, setTableData] = useState({ meta: {}, data: [] })
@@ -102,11 +103,31 @@ const CategoryPage = () => {
     })
 
     if (edited) {
-      setIsEdit(false)
-      setEditedItem(null)
+      onCancelEdit()
       setIsLoading(false)
       onLoadPage()
     }
+  }
+
+  function onCancelEdit() {
+    setIsEdit(false)
+    setEditedItem(null)
+  }
+
+  async function onCommitDelete(item) {
+    setIsLoading(true)
+    const deleted = db.collection('categories').doc(item.id).delete()
+
+    if (deleted) {
+      onCancelDelete()
+      setIsLoading(false)
+      onLoadPage()
+    }
+  }
+
+  function onCancelDelete() {
+    setIsDelete(false)
+    setDeletedItem(null)
   }
 
 
@@ -117,12 +138,21 @@ const CategoryPage = () => {
         onCancel={() => setIsAdd(false)} />
     </Panel>
     
-    <Panel title='Category' size='small' isOpen={isEdit} onClose={() => setIsEdit(false)}>
+    <Panel title='Category' size='small' isOpen={isEdit} onClose={() => onCancelEdit()}>
       <CategoryForm
         initialValues={editedItem}
         onSubmit={onCommitEdit}
-        onCancel={() => setIsEdit(false)} />
+        onCancel={() => onCancelEdit()} />
     </Panel>
+
+    <ConfirmationDialog
+      isOpen={isDelete} 
+      onClose={() => onCancelDelete()}
+      onAccept={() => onCommitDelete(deletedItem)}
+      color='danger'
+      title='Delete Category'
+      descriptions='Are you sure want to delete this category?'/>
+
     <div className='flex items-center bg-white py-4 px-6 shadow mb-6 rounded'>
       <h1 className='text-2xl font-medium text-gray-600'>Category</h1>
       <span className='ml-auto'>December 17 2019</span>
