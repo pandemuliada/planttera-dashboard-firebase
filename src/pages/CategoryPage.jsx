@@ -4,7 +4,7 @@ import { IoIosCreate, IoIosTrash } from 'react-icons/io'
 import { db } from '../firebase'
 import Table from '../components/Table'
 import { TextField } from '../components/inputs'
-import { Button } from '../components/buttons'
+import { Button, IconButton } from '../components/buttons'
 import Panel from '../components/Panel'
 import CategoryForm from '../components/forms/CategoryForm'
 import { ConfirmationDialog } from '../components/Dialog'
@@ -130,7 +130,6 @@ const CategoryPage = () => {
     setDeletedItem(null)
   }
 
-
   return (<div>
     <Panel title='Category' size='small' isOpen={isAdd} onClose={() => setIsAdd(false)}>
       <CategoryForm
@@ -155,7 +154,7 @@ const CategoryPage = () => {
 
     <div className='flex items-center bg-white py-4 px-6 shadow mb-6 rounded'>
       <h1 className='text-2xl font-medium text-gray-600'>Category</h1>
-      <span className='ml-auto'>December 17 2019</span>
+      <span className='ml-auto text-gray-600'>{dayjs().format("dddd, MMMM D YYYY")}</span>
     </div>
   
   
@@ -165,8 +164,11 @@ const CategoryPage = () => {
         <div>
           <Button color='primary' icon='add' size='small' onClick={() => setIsAdd(true)}>Add Category</Button>
         </div>
-        <div className='w-64 ml-auto'>
-          <TextField noMargin size='small' placeholder='Find category'/>
+        <div className='ml-auto flex'>
+          <div className='mr-1 w-64'>
+            <TextField noMargin size='small' name='name' placeholder='Find category'/>
+          </div>
+          <IconButton icon='search' size='small'/>
         </div>
       </div>
 
