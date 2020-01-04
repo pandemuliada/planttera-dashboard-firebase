@@ -83,7 +83,7 @@ const CategoryPage = () => {
 
   async function onCommitAdd(values) {
     setIsLoading(true)
-    const saved = db.collection("categories").add({
+    const saved = await db.collection("categories").add({
       ...values,
       created_at: Date.now()
     })
@@ -97,12 +97,12 @@ const CategoryPage = () => {
 
   async function onCommitEdit(values) {
     setIsLoading(true)
-    const edited = db.collection("categories").doc(editedItem.id).update({
+    const edited = await db.collection("categories").doc(editedItem.id).update({
       ...values,
       updated_at: Date.now()
     })
 
-    if (edited) {
+    if (edited == undefined) {
       onCancelEdit()
       setIsLoading(false)
       onLoadPage()
@@ -116,9 +116,9 @@ const CategoryPage = () => {
 
   async function onCommitDelete(item) {
     setIsLoading(true)
-    const deleted = db.collection('categories').doc(item.id).delete()
+    const deleted = await db.collection('categories').doc(item.id).delete()
 
-    if (deleted) {
+    if (deleted == undefined) {
       onCancelDelete()
       setIsLoading(false)
       onLoadPage()
