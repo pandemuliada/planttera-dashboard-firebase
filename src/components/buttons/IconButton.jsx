@@ -1,8 +1,14 @@
 import React from 'react'
-import { buttonColors, buttonIcons, buttonSizes } from './theme'
+import { buttonColors, buttonIcons } from './theme'
 import ReactLoading from 'react-loading'
 
 import { cn } from '../../utils/format'
+
+const sizeProps = {
+  small: 'py-1 px-1 ',
+  normal: 'py-2 px-2',
+  large: 'py-3 px-3',
+}
 
 const IconButton = (props) => {
   let {
@@ -31,7 +37,7 @@ const IconButton = (props) => {
         'border-2',
         'transition-all',
         outline ? 'bg-transparent' : `bg-${buttonColors[color].default}`,
-        size ? buttonSizes[size] : buttonSizes['normal'], 
+        size ? sizeProps[size] : sizeProps['normal'], 
         block ? 'w-full block' : 'w-auto',
         disabled ? 'opacity-50' : 'opacity-100',
         disabled ? 'cursor-not-allowed' : 'cursor-pointer',
