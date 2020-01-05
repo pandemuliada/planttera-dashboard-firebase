@@ -63,7 +63,7 @@ const RoomPage = () => {
     const data = []
 
     setIsLoading(true)
-    const docs = await db.collection('rooms').get()
+    const docs = await db.collection('rooms').orderBy('name', 'asc').get()
     
     docs.forEach((doc) => {
       data.push({

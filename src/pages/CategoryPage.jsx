@@ -63,7 +63,7 @@ const CategoryPage = () => {
     const data = []
 
     setIsLoading(true)
-    const docs = await db.collection('categories').get()
+    const docs = await db.collection('categories').orderBy('name', 'asc').get()
     
     docs.forEach((doc) => {
       data.push({
