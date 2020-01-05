@@ -1,6 +1,4 @@
 import React from 'react'
-import { withRouter } from 'react-router-dom'
-import { useCurrentUser } from '../contexts/AuthContext'
 
 const DashboardPage = (props) => {
   return(<div>

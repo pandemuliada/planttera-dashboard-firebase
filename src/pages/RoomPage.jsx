@@ -102,7 +102,7 @@ const RoomPage = () => {
       updated_at: Date.now()
     })
 
-    if (edited == undefined) {
+    if (edited === undefined) {
       onCancelEdit()
       setIsLoading(false)
       onLoadPage()
@@ -118,7 +118,7 @@ const RoomPage = () => {
     setIsLoading(true)
     const deleted = await db.collection('rooms').doc(item.id).delete()
 
-    if (deleted == undefined) {
+    if (deleted === undefined) {
       onCancelDelete()
       setIsLoading(false)
       onLoadPage()

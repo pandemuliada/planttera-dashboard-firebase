@@ -102,7 +102,7 @@ const CategoryPage = () => {
       updated_at: Date.now()
     })
 
-    if (edited == undefined) {
+    if (edited === undefined) {
       onCancelEdit()
       setIsLoading(false)
       onLoadPage()
@@ -118,7 +118,7 @@ const CategoryPage = () => {
     setIsLoading(true)
     const deleted = await db.collection('categories').doc(item.id).delete()
 
-    if (deleted == undefined) {
+    if (deleted === undefined) {
       onCancelDelete()
       setIsLoading(false)
       onLoadPage()
