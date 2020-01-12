@@ -77,7 +77,7 @@ const SelectField = React.forwardRef((props, ref) => {
     <select ref={ref} className={cn(styles.input)} {...rest}>
       <option value='' hidden>{options.length === 0 ? 'Load options...' : placeholder}</option>
       {options.map(({ key, label }) => (
-        <option key={key} value={label}>{label}</option>
+        <option key={key} value={key}>{label}</option>
       ))}
     </select>
     {touched && error && <span className={cn(styles.errorMessage)}>{error}</span>}

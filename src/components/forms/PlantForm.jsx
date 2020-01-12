@@ -8,8 +8,8 @@ import { db } from '../../firebase'
 
 const defaultValues = {
   name: '',
-  category: '',
-  room: '',
+  category_id: '',
+  room_id: '',
   stock: '',
   price: '',
   available: false,
@@ -17,9 +17,10 @@ const defaultValues = {
 
 const plantFormSchema = object().shape({
   name: string().required('Cannot be empty'),
-  category: string().required('Cannot be empty'),
-  room: string().required('Cannot be empty'),
-  stock: number().required('Cannot be empty').min(0, 'Minimal stock is 0')
+  category_id: string().required('Cannot be empty'),
+  room_id: string().required('Cannot be empty'),
+  stock: number().required('Cannot be empty').min(0, 'Minimal stock is 0'),
+  price: number().required('Cannot be empty').min(1, 'Minimal price is 1')
 })
 
 const PlantForm = (props) => {
@@ -83,10 +84,10 @@ const PlantForm = (props) => {
       return (<form onSubmit={handleSubmit}>
         <FormikTextField label='Name*' name='name' size='small'/>
         
-        <FormikSelectField label='Category*' name='category' size='small' placeholder='Choose Category'
+        <FormikSelectField label='Category*' name='category_id' size='small' placeholder='Choose Category'
           options={categoryOptions}/>
           
-        <FormikSelectField label='Room*' name='room' size='small' placeholder='Choose Room'
+        <FormikSelectField label='Room*' name='room_id' size='small' placeholder='Choose Room'
           options={roomOptions}/>
 
         <FormikTextField type='number' label='Stock*' name='stock' size='small' min='0'/>

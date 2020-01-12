@@ -13,19 +13,19 @@ import RoomPage from './pages/RoomPage'
 
 const App = () => {
   return (<AuthProvider>
-      <Router>
-        <Switch>
-          <Route exact path='/login' component={LoginPage} />
-          <PageContainer>
-            <PrivateRoute exact path='/dashboard' component={DashboardPage} />
-            <PrivateRoute exact path='/plants' component={PlantPage} />
-            <PrivateRoute path='/master-data/categories' component={CategoryPage} />
-            <PrivateRoute path='/master-data/rooms' component={RoomPage} />
-          </PageContainer>
-        </Switch>
-      </Router>
-    </AuthProvider>
-)
+    <Router>
+      <Switch>
+        <Route exact path='/login' component={LoginPage} />
+        <PageContainer>
+          <PrivateRoute exact path='/' component={DashboardPage} />
+          <PrivateRoute exact path='/dashboard' component={DashboardPage} />
+          <PrivateRoute exact path='/plants' component={PlantPage} />
+          <PrivateRoute exact path='/master-data/categories' component={CategoryPage} />
+          <PrivateRoute exact path='/master-data/rooms' component={RoomPage} />
+        </PageContainer>
+      </Switch>
+    </Router>
+  </AuthProvider>)
 }
 
 export default App

@@ -24,17 +24,6 @@ const PlantPage = () => {
     { 
       key: 'name', 
       label: 'Name',
-      render: ({ name }) => {
-        return (<span className='w-full flex items-center'><img className='w-6 h-6 rounded-full mr-3' src='https://i.pravatar.cc/50' />{name}</span>)
-      }
-    },
-    { 
-      key: 'category', 
-      label: 'Category',
-    },
-    { 
-      key: 'room', 
-      label: 'Room',
     },
     { 
       key: 'price', 
