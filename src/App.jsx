@@ -10,6 +10,7 @@ import PageContainer from './components/PageContainer'
 import PlantPage from './pages/PlantPage'
 import CategoryPage from './pages/CategoryPage'
 import RoomPage from './pages/RoomPage'
+import ShopProfilePage from './pages/ShopProfilePage'
 
 const App = () => {
   return (<AuthProvider>
@@ -20,6 +21,7 @@ const App = () => {
           <PrivateRoute exact path='/' component={DashboardPage} />
           <PrivateRoute exact path='/dashboard' component={DashboardPage} />
           <PrivateRoute exact path='/plants' component={PlantPage} />
+          <PrivateRoute exact path='/shop-profile' component={ShopProfilePage} />
           <PrivateRoute exact path='/master-data/categories' component={CategoryPage} />
           <PrivateRoute exact path='/master-data/rooms' component={RoomPage} />
         </PageContainer>

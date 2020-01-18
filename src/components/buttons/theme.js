@@ -1,5 +1,5 @@
 import React from 'react'
-import { IoIosAdd, IoIosCreate, IoIosTrash, IoIosSearch } from 'react-icons/io'
+import { IoIosAdd, IoIosCreate, IoIosTrash, IoIosSearch, IoMdCreate } from 'react-icons/io'
 import { colors } from '../../theme'
 
 const buttonColors = {
@@ -20,12 +20,19 @@ const buttonColors = {
     hover: `${colors.danger}-500`,
     disabled: `${colors.danger}-400`,
     outline: `${colors.danger}-100`
+  },
+  warning: {
+    default: `${colors.warning}-400`,
+    hover: `${colors.warning}-500`,
+    disabled: `${colors.warning}-400`,
+    outline: `${colors.warning}-100`
   }
 }
 
 const buttonIcons = {
   add: <IoIosAdd size={24} />,
   edit: <IoIosCreate size={24} />,
+  pencil: <IoMdCreate size={24} />,
   trash: <IoIosTrash size={24} />,
   search:  <IoIosSearch size={24} />,
 }
