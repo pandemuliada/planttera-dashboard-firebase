@@ -3,7 +3,7 @@ import { cn } from '../utils/format'
 import { auth } from '../firebase'
 import { useLocation, useHistory, useRouteMatch, NavLink } from 'react-router-dom'
 import { useCurrentUser } from '../contexts/AuthContext'
-import { IoMdHome, IoIosLeaf, IoIosAnalytics, IoMdSettings, IoMdLogOut } from 'react-icons/io'
+import { IoMdHome, IoIosLeaf, IoIosAnalytics, IoMdSettings, IoMdLogOut, IoIosApps } from 'react-icons/io'
 
 const sideNavStyles = {
   logoutButton: {
@@ -42,6 +42,11 @@ const menus = [
       { key: 'categories', label: 'Category' },
       { key: 'rooms', label: 'Room' },
     ]
+  },
+  {
+    key: 'shop-profile',
+    label: 'Shop Profile',
+    icon: <IoIosApps size={23}/>,
   },
   {
     key: 'settings',
