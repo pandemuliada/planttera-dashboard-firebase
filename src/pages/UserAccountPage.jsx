@@ -6,10 +6,13 @@ import { CurrentUserContext } from '../contexts/CurrentUserContext'
 import { IconButton } from '../components/buttons'
 import Panel from '../components/Panel'
 import UserAccountForm from '../components/forms/UserAccountForm'
+import Tabs from '../components/Tabs'
+import PasswordForm from '../components/forms/PasswordForm'
 
 const UserProfilePage = () => {
   const { currentUser, setCurrentUser } = useContext(CurrentUserContext)
-  const [isEdit, setIsEdit] = useState(false);
+  const [isEdit, setIsEdit] = useState(false)
+  const [activeTab, setIsActiveTab] = useState('profile')
 
   async function onCommitEditData(values) {
     try {
@@ -21,7 +24,7 @@ const UserProfilePage = () => {
       
       if (updatedProfile == undefined && updatedEmail == undefined) {
         setCurrentUser({...currentUser, ...values})
-        onCancelEditData()
+        setIsEdit(false)
       } else {
         throw "Something went wrong!"
       }
@@ -30,16 +33,46 @@ const UserProfilePage = () => {
     }
   }
 
-  function onCancelEditData() {
-    setIsEdit(false)
+  async function onCommitChangePassword(values) {
+    try {
+      const updatedPassword = await auth.currentUser.updatePassword(values.password)
+      if (updatedPassword === undefined) {
+        setIsEdit(false)
+      } else {
+        throw "Something went wrong!"
+      }
+    } catch (error) {
+      console.error(error)
+    } 
   }
 
   return (<div>
-    <Panel title='User Account' size='small' isOpen={isEdit} onClose={() => onCancelEditData()}>
-      <UserAccountForm
-        initialValues={currentUser}
-        onSubmit={onCommitEditData} 
-        onCancel={() => onCancelEditData()} />
+    <Panel title='User Account' size='small' isOpen={isEdit} onClose={() => setIsEdit(false)}>
+      <div className='mb-5'>
+        <Tabs 
+          items={[
+            { key: 'profile', label: "Profile" },
+            { key: 'password', label: "Password" },
+            { key: 'picture', label: "Picture" },
+          ]}
+          activeTab={activeTab}
+          onChangeTab={(key) => setIsActiveTab(key)}
+        />
+      </div>
+      {activeTab === 'profile' && 
+        <UserAccountForm
+          initialValues={currentUser}
+          onSubmit={onCommitEditData} 
+          onCancel={() => setIsEdit(false)} />
+      }
+      {activeTab === 'password' && 
+        <PasswordForm 
+          onSubmit={onCommitChangePassword} 
+          onCancel={() => setIsEdit(false)} />
+      }
+      {activeTab === 'picture' && 
+        'Picture upload here'
+      }
     </Panel>
 
     <div className='flex items-center bg-white py-4 px-6 shadow mb-6 rounded'>
