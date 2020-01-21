@@ -1,6 +1,6 @@
 import React from 'react'
 import { Redirect, Route, useLocation } from 'react-router-dom'
-import { useCurrentUser } from '../contexts/AuthContext'
+import { useCurrentUser } from '../contexts/CurrentUserContext'
 
 const PrivateRoute = ({ component: RouteComponent,...rest }) => {
   const currentUser = useCurrentUser()
