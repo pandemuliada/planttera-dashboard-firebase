@@ -20,6 +20,7 @@ const UserProfilePage = () => {
       const updatedEmail = await auth.currentUser.updateEmail(values.email)
       
       if (updatedProfile == undefined && updatedEmail == undefined) {
+        setCurrentUser({...currentUser, ...values})
         onCancelEditData()
       } else {
         throw "Something went wrong!"
