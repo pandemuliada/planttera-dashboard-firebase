@@ -2,13 +2,14 @@ import React, { useState } from 'react'
 import { Formik } from 'formik'
 import { object, string } from 'yup'
 import { auth } from '../firebase'
-import { useCurrentUser } from '../contexts/AuthContext'
+import { CurrentUserContext } from '../contexts/CurrentUserContext'
 import { Redirect, useHistory } from 'react-router'
 
 import { FormikTextField } from '../components/inputs'
 import { Button } from '../components/buttons'
 
 import BusinessVector from '../static/images/business-vector.svg'
+import { useContext } from 'react'
 
 const initialValues = {
   email: '',
@@ -23,7 +24,7 @@ const loginValidation = object().shape({
 const LoginPage = () => {
   let history = useHistory()
 
-  const currentUser = useCurrentUser()
+  const { currentUser } = useContext(CurrentUserContext)
   const [isFailed, setIsFailed] = useState(false)
 
   if(!!currentUser) {

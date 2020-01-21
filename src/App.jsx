@@ -1,5 +1,5 @@
 import React from 'react'
-import { AuthProvider } from './contexts/AuthContext'
+import { CurrentUserProvider } from './contexts/CurrentUserContext'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 
 import PrivateRoute from './components/PrivateRoute'
@@ -11,9 +11,10 @@ import PlantPage from './pages/PlantPage'
 import CategoryPage from './pages/CategoryPage'
 import RoomPage from './pages/RoomPage'
 import ShopProfilePage from './pages/ShopProfilePage'
+import UserAccountPage from './pages/UserAccountPage'
 
 const App = () => {
-  return (<AuthProvider>
+  return (<CurrentUserProvider>
     <Router>
       <Switch>
         <Route exact path='/login' component={LoginPage} />
@@ -24,10 +25,11 @@ const App = () => {
           <PrivateRoute exact path='/shop-profile' component={ShopProfilePage} />
           <PrivateRoute exact path='/master-data/categories' component={CategoryPage} />
           <PrivateRoute exact path='/master-data/rooms' component={RoomPage} />
+          <PrivateRoute exact path='/settings/account' component={UserAccountPage} />
         </PageContainer>
       </Switch>
     </Router>
-  </AuthProvider>)
+  </CurrentUserProvider>)
 }
 
 export default App

@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import { cn } from '../utils/format'
 import { auth } from '../firebase'
 import { useLocation, useHistory, useRouteMatch, NavLink } from 'react-router-dom'
-import { useCurrentUser } from '../contexts/AuthContext'
+import { CurrentUserContext } from '../contexts/CurrentUserContext'
 import { IoMdHome, IoIosLeaf, IoIosAnalytics, IoMdSettings, IoMdLogOut, IoIosApps } from 'react-icons/io'
+import { useContext } from 'react'
 
 const sideNavStyles = {
   logoutButton: {
@@ -125,10 +126,10 @@ const Item = (props) => {
   </>)
 }
 
-const SideNav = (props) => {
+const SideNav = () => {
   let history = useHistory()
   
-  const currentUser = useCurrentUser()
+  const { currentUser } = useContext(CurrentUserContext)
 
   async function signOut() {
     await auth.signOut()
