@@ -11,6 +11,7 @@ export const CurrentUserProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState({
     displayName: '',
     email: '',
+    photoURL: '',
   })
 
   // Check if user logged in or not
@@ -18,9 +19,8 @@ export const CurrentUserProvider = ({ children }) => {
     getCurrentUser()
   }, [])
 
-
   function getCurrentUser() {
-    return auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged((user) => {
       if (user) {
         setCurrentUser(user)
       } else {
@@ -31,7 +31,8 @@ export const CurrentUserProvider = ({ children }) => {
 
   const authStore = {
     currentUser,
-    setCurrentUser
+    setCurrentUser,
+    getCurrentUser
   }
   
   return(<CurrentUserContext.Provider value={authStore}>
