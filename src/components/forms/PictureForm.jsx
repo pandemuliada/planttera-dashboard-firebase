@@ -1,9 +1,8 @@
 import React from 'react'
 import { Formik } from "formik"
 import { object, mixed } from "yup"
-import { FormikTextField, TextField } from "../inputs"
+import { TextField } from "../inputs"
 import { OutlineButton, Button } from '../buttons'
-import { useState } from 'react'
 
 const SUPPORTED_FORMATS = [
   "image/jpg",
@@ -31,6 +30,7 @@ const pictureFormSchema = object().shape({
 
 const PictureForm = (props) => {
   const {
+    initialImage,
     onSubmit,
     onCancel,
   } = props
@@ -42,6 +42,9 @@ const PictureForm = (props) => {
   }
 
   return (<div>
+    <div className='mb-4'>
+      <img src={initialImage} alt=""/>
+    </div>
     <Formik initialValues={defaultValues} onSubmit={onSubmitForm} validationSchema={pictureFormSchema}>
       {({ values, handleSubmit, isSubmitting, handleReset, setFieldValue, errors }) => {
         return (<form onSubmit={handleSubmit} encType="multipart/form-data">

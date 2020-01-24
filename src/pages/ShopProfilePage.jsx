@@ -8,6 +8,8 @@ import ShopProfileForm from '../components/forms/ShopProfileForm'
 import PictureForm from '../components/forms/PictureForm'
 import SkeletonLoader from '../components/SkeletonLoader'
 
+import defaultImage from '../static/images/no-image.png'
+
 const ShopProfilePage = () => {
   const defaultShopData = {
     name: '',
@@ -86,6 +88,7 @@ const ShopProfilePage = () => {
       }
       {activeTab === 'logo' && 
         <PictureForm 
+          initialImage={(!!shopData && shopData.logo_url) || defaultImage}
           onSubmit={(file) => onCommitChangeLogo(file)}
           onCancel={() => setIsEdit(false)} />
       }
@@ -98,7 +101,7 @@ const ShopProfilePage = () => {
   
     <div className='flex items-start'>
       <div className='bg-white w-1/3 mr-5 py-4 px-6 shadow mb-8 rounded justify-center'>
-        {isLoading ? <SkeletonLoader height={150} /> : <img className='mx-auto' src={!!shopData && shopData.logo_url} alt={!!shopData && shopData.name}/>}
+        {isLoading ? <SkeletonLoader height={150} /> : <img className='mx-auto' src={(!!shopData && shopData.logo_url) || defaultImage} alt={!!shopData ? shopData.name : ''}/>}
       </div>
       <div className='bg-white w-2/3 py-4 px-6 shadow mb-8 rounded'>
         <table className='table-auto rounded w-full'>

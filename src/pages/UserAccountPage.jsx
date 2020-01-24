@@ -10,6 +10,8 @@ import UserAccountForm from '../components/forms/UserAccountForm'
 import PasswordForm from '../components/forms/PasswordForm'
 import PictureForm from '../components/forms/PictureForm'
 
+import defaultImage from '../static/images/no-image.png'
+
 const UserProfilePage = () => {
   const { currentUser, setCurrentUser } = useContext(CurrentUserContext)
   const [isEdit, setIsEdit] = useState(false)
@@ -80,18 +82,16 @@ const UserProfilePage = () => {
         <UserAccountForm
           initialValues={currentUser}
           onSubmit={onCommitEditData} 
-          onCancel={() => setIsEdit(false)} />
-      }
+          onCancel={() => setIsEdit(false)} />}
       {activeTab === 'password' && 
         <PasswordForm 
           onSubmit={onCommitChangePassword} 
-          onCancel={() => setIsEdit(false)} />
-      }
+          onCancel={() => setIsEdit(false)} />}
       {activeTab === 'picture' && 
         <PictureForm 
+          initialImage={(!!currentUser && currentUser.photoURL) || defaultImage}
           onSubmit={(file) => onCommitChangePicture(file)}
-          onCancel={() => setIsEdit(false)} />
-      }
+          onCancel={() => setIsEdit(false)} />}
     </Panel>
 
     <div className='flex items-center bg-white py-4 px-6 shadow mb-6 rounded'>
@@ -101,7 +101,7 @@ const UserProfilePage = () => {
   
     <div className='flex items-start'>
       <div className='bg-white w-1/3 mr-5 py-4 px-6 shadow mb-8 rounded'>
-        <img className='mx-auto' src={!!currentUser && currentUser.photoURL} alt={!!currentUser && currentUser.displayName}/>
+        <img className='mx-auto' src={(!!currentUser && currentUser.photoURL) || defaultImage} alt={!!currentUser ? currentUser.displayName : ''}/>
       </div>
       <div className='bg-white w-2/3 py-4 px-6 shadow mb-8 rounded'>
         <table className='table-auto rounded w-full'>

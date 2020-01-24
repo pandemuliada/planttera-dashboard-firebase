@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 import { IoIosCreate, IoIosTrash } from 'react-icons/io'
-import { db } from '../firebase'
+import { db, storage } from '../firebase'
 import Table from '../components/Table'
 import { TextField } from '../components/inputs'
 import { Button, IconButton } from '../components/buttons'
 import Panel from '../components/Panel'
+import Tabs from '../components/Tabs'
 import PlantForm from '../components/forms/PlantForm'
 import { ConfirmationDialog } from '../components/Dialog'
+import PictureForm from '../components/forms/PictureForm'
+
+import defaultImage from '../static/images/no-image.png'
 
 const PlantPage = () => {
   const [tableData, setTableData] = useState({ meta: {}, data: [] })
@@ -20,10 +24,18 @@ const PlantPage = () => {
   const [editedItem, setEditedItem] = useState(null)
   const [deletedItem, setDeletedItem] = useState(null)
 
+  const [activeTab, setActiveTab] = useState('data')
+
   const columns = [
     { 
       key: 'name', 
       label: 'Name',
+      render: ({ name, image_url }) => (
+        <div className='flex items-center'>
+          <img src={image_url || defaultImage} className='w-10 h-10 mr-3 rounded-full'/>
+          <span>{name}</span>
+        </div>
+      )
     },
     { 
       key: 'price', 
@@ -143,6 +155,24 @@ const PlantPage = () => {
     setDeletedItem(null)
   }
 
+  async function onCommitChangeImage(file) {
+    const fileExtension = file.type.split('/')[1]
+
+    const storageRef = storage.ref('plants/' + 'plant_' + editedItem.id + "." +fileExtension)
+    const snapshot = await storageRef.put(file)
+    const url = await snapshot.ref.getDownloadURL()
+
+    const updatedItem = await db.collection('plants').doc(editedItem.id).set({
+      ...editedItem,
+      image_url: url
+    })
+    
+    if (snapshot.state == 'success' && updatedItem == undefined) {
+      onCancelEdit()
+      onLoadPage()
+    }
+  }
+
   return (<div>
     <Panel title='Plant' size='small' isOpen={isAdd} onClose={() => setIsAdd(false)}>
       <PlantForm
@@ -151,10 +181,26 @@ const PlantPage = () => {
     </Panel>
     
     <Panel title='Plant' size='small' isOpen={isEdit} onClose={() => onCancelEdit()}>
+      <div className='mb-5'>
+        <Tabs
+          items={[
+            { key: 'data', label: 'Data' }, 
+            { key: 'image', label: 'Image' }
+          ]} 
+          activeTab={activeTab}
+          onChangeTab={(key) => setActiveTab(key)} />
+      </div>
+      {activeTab === 'data' &&
       <PlantForm
         initialValues={editedItem}
         onSubmit={onCommitEdit}
-        onCancel={() => onCancelEdit()} />
+        onCancel={() => onCancelEdit()} />}
+      
+      {activeTab === 'image' &&
+      <PictureForm
+        initialImage={(!!editedItem && editedItem.image_url) || defaultImage}
+        onSubmit={(file) => onCommitChangeImage(file)}
+        onCancel={() => onCancelEdit()} />}
     </Panel>
 
     <ConfirmationDialog
