@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react'
+import React, { useContext } from 'react'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import { auth, storage } from '../firebase'
@@ -13,17 +13,7 @@ import PictureForm from '../components/forms/PictureForm'
 const UserProfilePage = () => {
   const { currentUser, setCurrentUser } = useContext(CurrentUserContext)
   const [isEdit, setIsEdit] = useState(false)
-  const [activeTab, setIsActiveTab] = useState('picture')
-  const [userImage, setUserImage] = useState('')
-
-  useEffect(() => {
-    getUserImage()
-  }, [currentUser.photoURL])
-
-  async function getUserImage() {
-    const url = await storage.ref(`profiles/${currentUser.photoURL}`).getDownloadURL()
-    setUserImage(url)
-  }
+  const [activeTab, setActiveTab] = useState('profile')
 
   async function onCommitEditData(values) {
     try {
@@ -61,13 +51,14 @@ const UserProfilePage = () => {
     const fileExtension = file.type.split('/')[1]
 
     const storageRef = storage.ref('profiles/' + 'user_' + currentUser.uid + '.' + fileExtension)
-    const upload = await storageRef.put(file)
-    
+    const snapshot = await storageRef.put(file)
+    const url = await snapshot.ref.getDownloadURL()
+
     const updatedProfile = await auth.currentUser.updateProfile({
-      photoURL:  'user_' + currentUser.uid + '.' + fileExtension,
+      photoURL:  url,
     })
     
-    if (upload.state == 'success' && updatedProfile == undefined) {
+    if (snapshot.state == 'success' && updatedProfile == undefined) {
       setIsEdit(false)
     }
   }
@@ -82,7 +73,7 @@ const UserProfilePage = () => {
             { key: 'picture', label: "Picture" },
           ]}
           activeTab={activeTab}
-          onChangeTab={(key) => setIsActiveTab(key)}
+          onChangeTab={(key) => setActiveTab(key)}
         />
       </div>
       {activeTab === 'profile' && 
@@ -110,7 +101,7 @@ const UserProfilePage = () => {
   
     <div className='flex items-start'>
       <div className='bg-white w-1/3 mr-5 py-4 px-6 shadow mb-8 rounded'>
-        <img src={userImage} alt={!!currentUser && currentUser.displayName}/>
+        <img className='mx-auto' src={!!currentUser && currentUser.photoURL} alt={!!currentUser && currentUser.displayName}/>
       </div>
       <div className='bg-white w-2/3 py-4 px-6 shadow mb-8 rounded'>
         <table className='table-auto rounded w-full'>
