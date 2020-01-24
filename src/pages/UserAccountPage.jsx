@@ -1,27 +1,41 @@
 import React, { useEffect, useContext } from 'react'
 import dayjs from 'dayjs'
 import { useState } from 'react'
-import { db, auth } from '../firebase'
+import { auth, storage } from '../firebase'
 import { CurrentUserContext } from '../contexts/CurrentUserContext'
 import { IconButton } from '../components/buttons'
+import Tabs from '../components/Tabs'
 import Panel from '../components/Panel'
 import UserAccountForm from '../components/forms/UserAccountForm'
+import PasswordForm from '../components/forms/PasswordForm'
+import PictureForm from '../components/forms/PictureForm'
 
 const UserProfilePage = () => {
   const { currentUser, setCurrentUser } = useContext(CurrentUserContext)
-  const [isEdit, setIsEdit] = useState(false);
+  const [isEdit, setIsEdit] = useState(false)
+  const [activeTab, setIsActiveTab] = useState('picture')
+  const [userImage, setUserImage] = useState('')
+
+  useEffect(() => {
+    getUserImage()
+  }, [currentUser.photoURL])
+
+  async function getUserImage() {
+    const url = await storage.ref(`profiles/${currentUser.photoURL}`).getDownloadURL()
+    setUserImage(url)
+  }
 
   async function onCommitEditData(values) {
     try {
       const updatedProfile = await auth.currentUser.updateProfile({
-        displayName: values.displayName
+        displayName: values.displayName,
       })
 
       const updatedEmail = await auth.currentUser.updateEmail(values.email)
       
       if (updatedProfile == undefined && updatedEmail == undefined) {
         setCurrentUser({...currentUser, ...values})
-        onCancelEditData()
+        setIsEdit(false)
       } else {
         throw "Something went wrong!"
       }
@@ -30,16 +44,63 @@ const UserProfilePage = () => {
     }
   }
 
-  function onCancelEditData() {
-    setIsEdit(false)
+  async function onCommitChangePassword(values) {
+    try {
+      const updatedPassword = await auth.currentUser.updatePassword(values.password)
+      if (updatedPassword === undefined) {
+        setIsEdit(false)
+      } else {
+        throw "Something went wrong!"
+      }
+    } catch (error) {
+      console.error(error)
+    } 
+  }
+
+  async function onCommitChangePicture(file) {
+    const fileExtension = file.type.split('/')[1]
+
+    const storageRef = storage.ref('profiles/' + 'user_' + currentUser.uid + '.' + fileExtension)
+    const upload = await storageRef.put(file)
+    
+    const updatedProfile = await auth.currentUser.updateProfile({
+      photoURL:  'user_' + currentUser.uid + '.' + fileExtension,
+    })
+    
+    if (upload.state == 'success' && updatedProfile == undefined) {
+      setIsEdit(false)
+    }
   }
 
   return (<div>
-    <Panel title='User Account' size='small' isOpen={isEdit} onClose={() => onCancelEditData()}>
-      <UserAccountForm
-        initialValues={currentUser}
-        onSubmit={onCommitEditData} 
-        onCancel={() => onCancelEditData()} />
+    <Panel title='User Account' size='small' isOpen={isEdit} onClose={() => setIsEdit(false)}>
+      <div className='mb-5'>
+        <Tabs 
+          items={[
+            { key: 'profile', label: "Profile" },
+            { key: 'password', label: "Password" },
+            { key: 'picture', label: "Picture" },
+          ]}
+          activeTab={activeTab}
+          onChangeTab={(key) => setIsActiveTab(key)}
+        />
+      </div>
+      {activeTab === 'profile' && 
+        <UserAccountForm
+          initialValues={currentUser}
+          onSubmit={onCommitEditData} 
+          onCancel={() => setIsEdit(false)} />
+      }
+      {activeTab === 'password' && 
+        <PasswordForm 
+          onSubmit={onCommitChangePassword} 
+          onCancel={() => setIsEdit(false)} />
+      }
+      {activeTab === 'picture' && 
+        <PictureForm 
+          onSubmit={(file) => onCommitChangePicture(file)}
+          onCancel={() => setIsEdit(false)} />
+      }
     </Panel>
 
     <div className='flex items-center bg-white py-4 px-6 shadow mb-6 rounded'>
@@ -47,9 +108,9 @@ const UserProfilePage = () => {
       <span className='ml-auto text-gray-600'>{dayjs().format("dddd, MMMM D YYYY")}</span>
     </div>
   
-    <div className='flex'>
+    <div className='flex items-start'>
       <div className='bg-white w-1/3 mr-5 py-4 px-6 shadow mb-8 rounded'>
-        <img src={currentUser && currentUser.photoURL} alt={currentUser && currentUser.displayName}/>
+        <img src={userImage} alt={!!currentUser && currentUser.displayName}/>
       </div>
       <div className='bg-white w-2/3 py-4 px-6 shadow mb-8 rounded'>
         <table className='table-auto rounded w-full'>

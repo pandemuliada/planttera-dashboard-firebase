@@ -69,7 +69,7 @@ const Panel = (props) => {
         <h2 className='text-2xl text-gray-700 font-medium'>{title}</h2>
       </div>
       <hr/>
-      <div className='mt-5'>
+      <div className='mt-4'>
         {children}
       </div>
     </PanelBoard>
