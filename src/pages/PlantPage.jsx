@@ -40,7 +40,7 @@ const PlantPage = () => {
     { 
       key: 'price', 
       label: 'Price',
-      render: ({price}) => ('Rp.' + price)
+      render: ({price}) => ('Rp. ' + price)
     },
     { 
       key: 'stock', 
@@ -52,6 +52,11 @@ const PlantPage = () => {
       render: ({ available }) => (available ? 'Available' : 'Not available')
     },
     { 
+      key: 'category', 
+      label: 'Category',
+      render: ({ category: { label } }) => label
+    },
+    { 
       key: 'created_at', 
       label: 'Created at',
       render: ({ created_at }) => dayjs(created_at).format('dddd, MMMM D YYYY')
@@ -59,12 +64,12 @@ const PlantPage = () => {
     { 
       key: 'options', 
       label: 'Options',
-      render: (item) => (<div className='flex items-center'>
+      render: ({ id, name, category: { key : category_id}, room: { key: room_id }, stock, price, available, image_url }) => (<div className='flex items-center'>
         <button 
           className='p-1 text-gray-400 hover:text-yellow-400' 
           onClick={() => { 
             setIsEdit(true) 
-            setEditedItem(item)
+            setEditedItem({ id, name, category_id, room_id, stock, price, available, image_url })
           }}>
           <IoIosCreate size={22}/>
         </button>
@@ -72,7 +77,7 @@ const PlantPage = () => {
           className='p-1 text-gray-400 hover:text-red-400' 
           onClick={() => {
             setIsDelete(true)
-            setDeletedItem(item)
+            setDeletedItem({ id })
           }}>
           <IoIosTrash size={22}/>
         </button>
@@ -162,8 +167,7 @@ const PlantPage = () => {
     const snapshot = await storageRef.put(file)
     const url = await snapshot.ref.getDownloadURL()
 
-    const updatedItem = await db.collection('plants').doc(editedItem.id).set({
-      ...editedItem,
+    const updatedItem = await db.collection('plants').doc(editedItem.id).update({
       image_url: url
     })
     

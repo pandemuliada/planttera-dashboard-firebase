@@ -72,6 +72,12 @@ const PlantForm = (props) => {
   }
 
   function onSubmitForm(values, callback) {
+    values['category'] = categoryOptions.find(category => category.key === values.category_id)  
+    values['room'] = roomOptions.find(room => room.key === values.room_id)  
+    
+    delete values.category_id
+    delete values.room_id
+
     onSubmit(values).then(() => {
       callback.resetForm()
     }).catch(error => {
