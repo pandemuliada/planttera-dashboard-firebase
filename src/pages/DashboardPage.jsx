@@ -5,7 +5,7 @@ import Table from '../components/Table'
 
 import defaultImage from '../static/images/no-image.png'
 import { NavLink } from 'react-router-dom'
-import { IoIosOpen, IoMdOpen } from 'react-icons/io'
+import { IoMdOpen } from 'react-icons/io'
 
 const DashboardPage = () => {
   const [plantTableData, setPlantTableData] = useState({ data: [], meta: {} })

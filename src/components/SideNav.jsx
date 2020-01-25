@@ -5,6 +5,7 @@ import { useLocation, useHistory, useRouteMatch, NavLink } from 'react-router-do
 import { CurrentUserContext } from '../contexts/CurrentUserContext'
 import { IoMdHome, IoIosLeaf, IoIosAnalytics, IoMdSettings, IoMdLogOut, IoIosApps } from 'react-icons/io'
 import { useContext } from 'react'
+import { ConfirmationDialog } from './Dialog'
 
 const sideNavStyles = {
   logoutButton: {
@@ -131,6 +132,7 @@ const SideNav = () => {
   let history = useHistory()
   
   const { currentUser } = useContext(CurrentUserContext)
+  const [isLogout, setIsLogout] = useState(false)
 
   async function signOut() {
     await auth.signOut()
@@ -138,6 +140,16 @@ const SideNav = () => {
   }
 
   return (<>
+    <ConfirmationDialog
+      isOpen={isLogout} 
+      onClose={() => setIsLogout(false)}
+      onAccept={() => signOut()}
+      color='danger'
+      title='Logout'
+      descriptions='Are you sure want to logout from application?'
+      acceptLabel="Logout"
+      cancelLabel="Cancel" />
+      
     <div className='mx-12 mb-5 mt-12'>
       <h2 className='font-normal text-xl text-gray-700'>Welcome back, <br/> <span className='text-teal-400 font-semibold text-2xl'>{!!currentUser && currentUser.displayName}</span></h2>
     </div>
@@ -149,7 +161,7 @@ const SideNav = () => {
     </div>
     <hr className='mx-8' />
     <div className='mx-8 mt-6'>
-      <button className={cn(sideNavStyles.logoutButton)} onClick={signOut}>
+      <button className={cn(sideNavStyles.logoutButton)} onClick={() => setIsLogout(true)}>
         <IoMdLogOut size={22} className='mr-6' /> Sign Out
       </button>
     </div>

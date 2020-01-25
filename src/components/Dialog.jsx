@@ -93,6 +93,8 @@ const ConfirmationDialog = (props) => {
   const { 
     descriptions,
     onAccept,
+    acceptLabel='Delete',
+    cancelLabel='Cancel',
     ...rest
   } = props
   
@@ -101,10 +103,10 @@ const ConfirmationDialog = (props) => {
     <hr className='mt-5 mb-3'/>
     <div className='flex justify-end'>
       <div className='mr-2'>
-        <Button color={rest.color} size='small' onClick={onAccept}>Delete</Button>
+        <Button color={rest.color} size='small' onClick={onAccept}>{acceptLabel}</Button>
       </div>
       <div>
-        <OutlineButton color={rest.color} size='small' onClick={rest.onClose}>Cancel</OutlineButton>
+        <OutlineButton color={rest.color} size='small' onClick={rest.onClose}>{cancelLabel}</OutlineButton>
       </div>
     </div>
   </Dialog>)
