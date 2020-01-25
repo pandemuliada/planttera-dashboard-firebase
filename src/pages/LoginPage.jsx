@@ -8,7 +8,7 @@ import { Redirect, useHistory } from 'react-router'
 import { FormikTextField } from '../components/inputs'
 import { Button } from '../components/buttons'
 
-import BusinessVector from '../static/images/business-vector.svg'
+import background from '../static/images/login-bg.jpg'
 import { useContext } from 'react'
 
 const initialValues = {
@@ -48,8 +48,8 @@ const LoginPage = () => {
   return(<>
     <div className='w-full flex items-center h-screen bg-teal-400'>
       <div className='flex items-center mx-auto bg-white rounded-lg shadow-xl' style={{ width: 1200, maxWidth: 1200 }}>
-        <div className='h-full w-1/2 p-24 bg-gray-100 rounded-tl-lg rounded-bl-lg'>
-          <img src={BusinessVector} alt='Login Vector' className="block mr-32 w-full"/>
+        <div className='h-full w-1/2 bg-gray-100 rounded-tl-lg rounded-bl-lg'>
+          <img src={background} alt='Login Vector' className="block mr-32 w-full"/>
         </div>
         <div className='w-1/2 p-12'>
           <div className='bg-white p-12 rounded'>
