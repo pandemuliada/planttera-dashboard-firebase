@@ -24,7 +24,7 @@ const DashboardPage = () => {
       label: 'Name',
       render: ({ name, image_url }) => (
         <div className='flex items-center w-auto'>
-          <img src={image_url || defaultImage} className='w-10 h-10 mr-3 rounded-full'/>
+          <img src={image_url || defaultImage} className='w-10 h-10 mr-3 rounded-full' alt="" />
           <span>{name}</span>
         </div>
       )

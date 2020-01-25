@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Formik } from 'formik'
 import { string, object } from 'yup'
 import { FormikTextField } from '../inputs'

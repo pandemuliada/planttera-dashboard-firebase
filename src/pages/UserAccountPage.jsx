@@ -25,7 +25,7 @@ const UserProfilePage = () => {
 
       const updatedEmail = await auth.currentUser.updateEmail(values.email)
       
-      if (updatedProfile == undefined && updatedEmail == undefined) {
+      if (updatedProfile === undefined && updatedEmail === undefined) {
         setCurrentUser({...currentUser, ...values})
         setIsEdit(false)
       } else {
@@ -60,7 +60,7 @@ const UserProfilePage = () => {
       photoURL:  url,
     })
     
-    if (snapshot.state == 'success' && updatedProfile == undefined) {
+    if (snapshot.state === 'success' && updatedProfile === undefined) {
       setIsEdit(false)
     }
   }

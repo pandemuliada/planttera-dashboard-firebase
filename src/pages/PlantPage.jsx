@@ -32,7 +32,7 @@ const PlantPage = () => {
       label: 'Name',
       render: ({ name, image_url }) => (
         <div className='flex items-center'>
-          <img src={image_url || defaultImage} className='w-10 h-10 mr-3 rounded-full'/>
+          <img src={image_url || defaultImage} className='w-10 h-10 mr-3 rounded-full' alt=""/>
           <span>{name}</span>
         </div>
       )
@@ -171,7 +171,7 @@ const PlantPage = () => {
       image_url: url
     })
     
-    if (snapshot.state == 'success' && updatedItem == undefined) {
+    if (snapshot.state === 'success' && updatedItem === undefined) {
       onCancelEdit()
       onLoadPage()
     }

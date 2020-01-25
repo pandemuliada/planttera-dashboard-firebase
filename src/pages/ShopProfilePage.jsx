@@ -44,7 +44,7 @@ const ShopProfilePage = () => {
       ...values
     })
 
-    if (edited == undefined) {
+    if (edited === undefined) {
       setIsEdit(false)
       getShopData()
     }
@@ -62,7 +62,7 @@ const ShopProfilePage = () => {
       logo_url:  url,
     })
     
-    if (snapshot.state == 'success' && updated === undefined) {
+    if (snapshot.state === 'success' && updated === undefined) {
       setIsEdit(false)
       getShopData()
     }
