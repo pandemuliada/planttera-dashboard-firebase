@@ -19,6 +19,7 @@ const sideNavStyles = {
       'py-2',
       'px-5',
       'text-red-400',
+      'transition-all',
     ],
     hover: ['bg-red-400', 'text-white', 'shadow-lg'],
   },
@@ -111,7 +112,7 @@ const Item = (props) => {
       <button className={cn(styles.parrentItem)} onClick={() => setIsShowChild(!isShowChild)}>
         {icon} <span className={cn(styles.label)}>{label}</span>
       </button>
-      {isShowChild && <div className='shadow ml-16 rounded mb-2'>
+      {isShowChild && <div className='shadow ml-10 rounded mb-2'>
         {items.map(item => {
           const active = '/'+key+'/'+item.key === pathname
           return (<NavLink key={item.key} to={`/${key}/${item.key}`} className={cn(styles.childItem) + (active && ' bg-gray-200')}>{item.label}</NavLink>)
