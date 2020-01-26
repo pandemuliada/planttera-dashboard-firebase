@@ -11,11 +11,14 @@ import PasswordForm from '../components/forms/PasswordForm'
 import PictureForm from '../components/forms/PictureForm'
 
 import defaultImage from '../static/images/no-image.png'
+import Toaster from '../components/Toaster'
 
 const UserProfilePage = () => {
   const { currentUser, setCurrentUser } = useContext(CurrentUserContext)
   const [isEdit, setIsEdit] = useState(false)
   const [activeTab, setActiveTab] = useState('profile')
+
+  const [toast, setToast] = useState({ isShow: false, title: '', description: '', type: 'default' })
 
   async function onCommitEditData(values) {
     try {
@@ -28,11 +31,25 @@ const UserProfilePage = () => {
       if (updatedProfile === undefined && updatedEmail === undefined) {
         setCurrentUser({...currentUser, ...values})
         setIsEdit(false)
-      } else {
-        throw "Something went wrong!"
+        setIsEdit(false)
+        setToast({
+          ...toast, 
+          isShow: true,
+          type: 'primary',
+          title: 'Success',
+          description: 'Your data has been updated' 
+        })
       }
     } catch (error) {
-      console.error(error)
+      (error.code === 'auth/requires-recent-login') &&
+        setIsEdit(false)
+        setToast({
+          ...toast, 
+          isShow: true,
+          type: 'danger',
+          title: 'Something went wrong',
+          description: 'Email contain sensitive information, please logout and login again to change your email' 
+        })
     }
   }
 
@@ -66,6 +83,14 @@ const UserProfilePage = () => {
   }
 
   return (<div>
+    <Toaster
+      isShow={toast.isShow}
+      type={toast.type}
+      onClose={() => setToast({...toast, isShow: false})}
+      title={toast.title}
+      description={toast.description}
+    />
+
     <Panel title='User Account' size='small' isOpen={isEdit} onClose={() => setIsEdit(false)}>
       <div className='mb-5'>
         <Tabs 

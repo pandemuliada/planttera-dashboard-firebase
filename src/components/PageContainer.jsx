@@ -8,7 +8,7 @@ const PageContainer = ({ children }) => {
   <div className='bg-white' style={{ width: 400, boxShadow: '2px 0 10px rgba(0,0,0,0.05)' }}>
     <SideNav />
   </div>
-  <div className='p-6 w-full min-h-screen'>
+  <div className='p-6 w-full min-h-screen relative'>
     {children}
   </div>
 </div>)
