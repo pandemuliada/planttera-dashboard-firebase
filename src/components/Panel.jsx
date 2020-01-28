@@ -61,7 +61,7 @@ const Panel = (props) => {
   
   return (<>
     <PanelBackdrop pose={isOpen ? 'open': 'closed'} className='fixed top-0 left-0 w-full h-screen bg-black opacity-50' onClick={() => onClose()}/>
-    <PanelBoard pose={isOpen ? 'open' : 'closed' } className='fixed bg-white top-0 right-0 h-full px-6 z-30' style={{ width: panelBoardSize[size] }}>
+    <PanelBoard pose={isOpen ? 'open' : 'closed' } className='fixed bg-white top-0 right-0 h-full px-6 z-30 overflow-y-auto pb-10' style={{ width: panelBoardSize[size] }}>
       <button className='absolute mt-3 mr-3 right-0 text-gray-600 hover:text-gray-800' onClick={onClose}>
         <IoIosClose size={30} />
       </button>

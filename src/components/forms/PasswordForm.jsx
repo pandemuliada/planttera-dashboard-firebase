@@ -9,7 +9,7 @@ const defaultValues = {
 }
 
 const passwordFormSchema = object().shape({
-  password: string().required('Cannot be empty'),
+  password: string().required('Cannot be empty').min(6, "Password should at least 6 characters"),
 })
 
 const PasswordForm = (props) => {
@@ -26,10 +26,10 @@ const PasswordForm = (props) => {
     })
   }
   
-  return (<Formik initialValues={defaultValues} validationSchema={passwordFormSchema} onSubmit={onSubmitForm}>
+  return (<Formik enableReinitialize initialValues={defaultValues} validationSchema={passwordFormSchema} onSubmit={onSubmitForm}>
     {({ handleSubmit, isSubmitting, isValid, handleReset }) => {
       return(<form onSubmit={handleSubmit}>
-        <FormikTextField size='small' name='password' label='New Password*' placeholder='Enter your new password' />
+        <FormikTextField type="password" size='small' name='password' label='New Password*' placeholder='Enter your new password' />
 
         <div className='flex justify-end'>
           <div className='mr-2'>

@@ -6,19 +6,24 @@ import { CurrentUserContext } from '../contexts/CurrentUserContext'
 import { IconButton } from '../components/buttons'
 import Tabs from '../components/Tabs'
 import Panel from '../components/Panel'
+import Toaster from '../components/Toaster'
 import UserAccountForm from '../components/forms/UserAccountForm'
 import PasswordForm from '../components/forms/PasswordForm'
 import PictureForm from '../components/forms/PictureForm'
 
 import defaultImage from '../static/images/no-image.png'
-import Toaster from '../components/Toaster'
 
 const UserProfilePage = () => {
   const { currentUser, setCurrentUser } = useContext(CurrentUserContext)
   const [isEdit, setIsEdit] = useState(false)
   const [activeTab, setActiveTab] = useState('profile')
 
-  const [toast, setToast] = useState({ isShow: false, title: '', description: '', type: 'default' })
+  const defaultToastState = { 
+    isShow: false, 
+    type: 'default',
+    duration: 4000, // remove duration property to prevent autoclose after 4s 
+  }
+  const [toast, setToast] = useState(defaultToastState)
 
   async function onCommitEditData(values) {
     try {
@@ -31,25 +36,25 @@ const UserProfilePage = () => {
       if (updatedProfile === undefined && updatedEmail === undefined) {
         setCurrentUser({...currentUser, ...values})
         setIsEdit(false)
-        setIsEdit(false)
         setToast({
           ...toast, 
           isShow: true,
           type: 'primary',
-          title: 'Success',
-          description: 'Your data has been updated' 
+          title: 'Data Updated',
+          message: 'Your data has been updated' 
         })
       }
     } catch (error) {
-      (error.code === 'auth/requires-recent-login') &&
+      if (error.code === 'auth/requires-recent-login') {
         setIsEdit(false)
         setToast({
           ...toast, 
           isShow: true,
           type: 'danger',
-          title: 'Something went wrong',
-          description: 'Email contain sensitive information, please logout and login again to change your email' 
+          title: 'Sensitive Operation',
+          message: 'Login again before retrying change your email'
         })
+      }
     }
   }
 
@@ -58,11 +63,26 @@ const UserProfilePage = () => {
       const updatedPassword = await auth.currentUser.updatePassword(values.password)
       if (updatedPassword === undefined) {
         setIsEdit(false)
-      } else {
-        throw "Something went wrong!"
+        setToast({
+          ...toast, 
+          isShow: true,
+          type: 'primary',
+          title: 'Password Updated',
+          message: 'Password updated successfully' 
+        })
       }
     } catch (error) {
-      console.error(error)
+      console.log(error)
+      if (error.code === 'auth/requires-recent-login') {
+        setIsEdit(false)
+        setToast({
+          ...toast, 
+          isShow: true,
+          type: 'danger',
+          title: 'Sensitive Operation',
+          message: 'Login again before retrying change your password' 
+        })
+      }
     } 
   }
 
@@ -79,6 +99,13 @@ const UserProfilePage = () => {
     
     if (snapshot.state === 'success' && updatedProfile === undefined) {
       setIsEdit(false)
+      setToast({
+        ...toast, 
+        isShow: true,
+        type: 'primary',
+        title: 'Picture Updated',
+        message: 'Profile picture changed successfully' 
+      })
     }
   }
 
@@ -86,10 +113,10 @@ const UserProfilePage = () => {
     <Toaster
       isShow={toast.isShow}
       type={toast.type}
-      onClose={() => setToast({...toast, isShow: false})}
+      duration={toast.duration}
       title={toast.title}
-      description={toast.description}
-    />
+      message={toast.message}
+      onClose={() => setToast({...toast, ...defaultToastState})}/>
 
     <Panel title='User Account' size='small' isOpen={isEdit} onClose={() => setIsEdit(false)}>
       <div className='mb-5'>
