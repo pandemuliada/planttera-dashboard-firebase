@@ -3,11 +3,12 @@ import dayjs from 'dayjs'
 import { IoIosCreate, IoIosTrash } from 'react-icons/io'
 import { db } from '../firebase'
 import Table from '../components/Table'
+import Panel from '../components/Panel'
+import Toaster from '../components/Toaster'
 import { TextField } from '../components/inputs'
 import { Button, IconButton } from '../components/buttons'
-import Panel from '../components/Panel'
-import CategoryForm from '../components/forms/CategoryForm'
 import { ConfirmationDialog } from '../components/Dialog'
+import CategoryForm from '../components/forms/CategoryForm'
 
 const CategoryPage = () => {
   const [tableData, setTableData] = useState({ meta: {}, data: [] })
@@ -19,6 +20,13 @@ const CategoryPage = () => {
 
   const [editedItem, setEditedItem] = useState(null)
   const [deletedItem, setDeletedItem] = useState(null)
+
+  const defaultToastState = { 
+    isShow: false, 
+    type: 'default',
+    duration: 4000, // remove duration property to prevent autoclose after 4s 
+  }
+  const [toast, setToast] = useState(defaultToastState)
 
   const columns = [
     { 
@@ -61,24 +69,35 @@ const CategoryPage = () => {
 
   async function onLoadPage() {
     const data = []
-
     setIsLoading(true)
-    const docs = await db.collection('categories').orderBy('name', 'asc').get()
-    
-    docs.forEach((doc) => {
-      data.push({
-        id: doc.id,
-        ...doc.data()
+
+    try {
+      const docs = await db.collection('categories').orderBy('name', 'asc').get()
+      
+      docs.forEach((doc) => {
+        data.push({
+          id: doc.id,
+          ...doc.data()
+        })
       })
-    })
-    
-    const newTableData = {
-      meta: { count: data.length },
-      data
+      
+      const newTableData = {
+        meta: { count: data.length },
+        data
+      }
+  
+      if (newTableData) setIsLoading(false)
+      setTableData({...newTableData})
+    } catch (error) {
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'warning',
+        title: 'Network Problem',
+        message: 'Cant\'t get category data, reload the page' 
+      })
     }
 
-    if (newTableData) setIsLoading(false)
-    setTableData({...newTableData})
   }
 
   async function onCommitAdd(values) {
@@ -92,6 +111,13 @@ const CategoryPage = () => {
       setIsAdd(false)
       setIsLoading(false)
       onLoadPage()
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Category Added',
+        message: 'A new category has been added' 
+      })
     }
   }
 
@@ -106,6 +132,13 @@ const CategoryPage = () => {
       onCancelEdit()
       setIsLoading(false)
       onLoadPage()
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Category Updated',
+        message: `${editedItem.name} category updated successfully` 
+      })
     }
   }
 
@@ -122,6 +155,13 @@ const CategoryPage = () => {
       onCancelDelete()
       setIsLoading(false)
       onLoadPage()
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Category Deleted',
+        message: `${deletedItem.name} category has been deleted` 
+      })
     }
   }
 
@@ -131,6 +171,14 @@ const CategoryPage = () => {
   }
 
   return (<div>
+    <Toaster
+      isShow={toast.isShow}
+      type={toast.type}
+      duration={toast.duration}
+      title={toast.title}
+      message={toast.message}
+      onClose={() => setToast({...toast, ...defaultToastState})}/>
+
     <Panel title='Category' size='small' isOpen={isAdd} onClose={() => setIsAdd(false)}>
       <CategoryForm
         onSubmit={onCommitAdd}

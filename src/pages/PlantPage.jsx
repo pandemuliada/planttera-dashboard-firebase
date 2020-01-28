@@ -3,12 +3,13 @@ import dayjs from 'dayjs'
 import { IoIosCreate, IoIosTrash } from 'react-icons/io'
 import { db, storage } from '../firebase'
 import Table from '../components/Table'
-import { TextField } from '../components/inputs'
-import { Button, IconButton } from '../components/buttons'
 import Panel from '../components/Panel'
 import Tabs from '../components/Tabs'
-import PlantForm from '../components/forms/PlantForm'
+import Toaster from '../components/Toaster'
+import { TextField } from '../components/inputs'
+import { Button, IconButton } from '../components/buttons'
 import { ConfirmationDialog } from '../components/Dialog'
+import PlantForm from '../components/forms/PlantForm'
 import PictureForm from '../components/forms/PictureForm'
 
 import defaultImage from '../static/images/no-image.png'
@@ -25,6 +26,13 @@ const PlantPage = () => {
   const [deletedItem, setDeletedItem] = useState(null)
 
   const [activeTab, setActiveTab] = useState('data')
+
+  const defaultToastState = { 
+    isShow: false, 
+    type: 'default',
+    duration: 4000, // remove duration property to prevent autoclose after 4s 
+  }
+  const [toast, setToast] = useState(defaultToastState)
 
   const columns = [
     { 
@@ -77,7 +85,7 @@ const PlantPage = () => {
           className='p-1 text-gray-400 hover:text-red-400' 
           onClick={() => {
             setIsDelete(true)
-            setDeletedItem({ id })
+            setDeletedItem({ id, name })
           }}>
           <IoIosTrash size={22}/>
         </button>
@@ -91,24 +99,33 @@ const PlantPage = () => {
 
   async function onLoadPage() {
     const data = []
-
     setIsLoading(true)
-    const docs = await db.collection('plants').orderBy('name', 'asc').get()
-    
-    docs.forEach((doc) => {
-      data.push({
-        id: doc.id,
-        ...doc.data()
+    try {
+      const docs = await db.collection('plants').orderBy('name', 'asc').get()
+      
+      docs.forEach((doc) => {
+        data.push({
+          id: doc.id,
+          ...doc.data()
+        })
       })
-    })
-    
-    const newTableData = {
-      meta: { count: data.length },
-      data
+      
+      const newTableData = {
+        meta: { count: data.length },
+        data
+      }
+  
+      if (newTableData) setIsLoading(false)
+      setTableData({...newTableData})
+    } catch (error) {
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'warning',
+        title: 'Network Problem',
+        message: 'Cant\'t get plant data, reload the page' 
+      })
     }
-
-    if (newTableData) setIsLoading(false)
-    setTableData({...newTableData})
   }
 
   async function onCommitAdd(values) {
@@ -122,6 +139,13 @@ const PlantPage = () => {
       setIsAdd(false)
       setIsLoading(false)
       onLoadPage()
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Plant Added',
+        message: 'A new plant has been added' 
+      })
     }
   }
 
@@ -136,6 +160,13 @@ const PlantPage = () => {
       onCancelEdit()
       setIsLoading(false)
       onLoadPage()
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Plant Updated',
+        message: `${editedItem.name} updated successfully` 
+      })
     }
   }
 
@@ -152,6 +183,13 @@ const PlantPage = () => {
       onCancelDelete()
       setIsLoading(false)
       onLoadPage()
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Plant Updated',
+        message: `${deletedItem.name} deleted successfully` 
+      })
     }
   }
 
@@ -174,10 +212,25 @@ const PlantPage = () => {
     if (snapshot.state === 'success' && updatedItem === undefined) {
       onCancelEdit()
       onLoadPage()
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Image Updated',
+        message: `${editedItem.name} image changed successfully` 
+      })
     }
   }
 
   return (<div>
+    <Toaster
+      isShow={toast.isShow}
+      type={toast.type}
+      duration={toast.duration}
+      title={toast.title}
+      message={toast.message}
+      onClose={() => setToast({...toast, ...defaultToastState})}/>
+
     <Panel title='Plant' size='small' isOpen={isAdd} onClose={() => setIsAdd(false)}>
       <PlantForm
         onSubmit={onCommitAdd}
