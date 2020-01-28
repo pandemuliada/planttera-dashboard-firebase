@@ -7,6 +7,7 @@ import Panel from '../components/Panel'
 import ShopProfileForm from '../components/forms/ShopProfileForm'
 import PictureForm from '../components/forms/PictureForm'
 import SkeletonLoader from '../components/SkeletonLoader'
+import Toaster from '../components/Toaster'
 
 import defaultImage from '../static/images/no-image.png'
 
@@ -20,8 +21,17 @@ const ShopProfilePage = () => {
 
   const [shopData, setShopData] = useState(defaultShopData)
   const [isEdit, setIsEdit] = useState(false)
+  const [editedData, setEditedData] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('data')
+
+  const defaultToastState = { 
+    isShow: false, 
+    type: 'default',
+    duration: 3000, // remove duration property to prevent autoclose after 4s 
+  }
+  const [toast, setToast] = useState(defaultToastState)
+
 
   useEffect(() => {
     getShopData()
@@ -29,14 +39,29 @@ const ShopProfilePage = () => {
 
   async function getShopData() {
     setIsLoading(true)
-    const doc = await db.collection('shops').doc('shop-profile').get()
-  
-    if (doc.exists) {
+
+    try {
+      const doc = await db.collection('shops').doc('shop-profile').get()
+    
+      if (doc.exists) {
+        setShopData(doc.data())
+        setIsLoading(false)
+      } else {
+        setIsLoading(false)
+        setShopData({...defaultShopData})
+      }
+      
+    } catch (error) {
       setIsLoading(false)
-      setShopData(doc.data())
-    } else {
-      setShopData({...defaultShopData})
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'warning',
+        title: 'Network Problem',
+        message: 'Cant\'t get shop data, reload the page' 
+      })
     }
+
   }
 
   async function onCommitEditData(values) {
@@ -47,6 +72,13 @@ const ShopProfilePage = () => {
     if (edited === undefined) {
       setIsEdit(false)
       getShopData()
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Data Updated',
+        message: 'Shop data has been updated' 
+      })
     }
   }
 
@@ -65,11 +97,30 @@ const ShopProfilePage = () => {
     if (snapshot.state === 'success' && updated === undefined) {
       setIsEdit(false)
       getShopData()
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Logo Updated',
+        message: 'Shop logo changed successfully' 
+      })
     }
   }
 
   return (<div>
-    <Panel title='Shop Profile' size='small' isOpen={isEdit} onClose={() => setIsEdit(false)}>
+    <Toaster
+      isShow={toast.isShow}
+      type={toast.type}
+      duration={toast.duration}
+      title={toast.title}
+      message={toast.message}
+      onClose={() => setToast({...toast, ...defaultToastState})}/>
+
+    <Panel title='Shop Profile' size='small' isOpen={isEdit} 
+      onClose={() => { 
+        setIsEdit(false)
+        setEditedData(shopData)
+      } }>
       <div className='mb-5'>
         <Tabs 
           items={[
@@ -82,13 +133,16 @@ const ShopProfilePage = () => {
       </div>
       {activeTab === 'data' && 
         <ShopProfileForm
-          initialValues={shopData}
+          initialValues={!!editedData && editedData}
           onSubmit={onCommitEditData} 
-          onCancel={() => setIsEdit(false)} />
+          onCancel={() => { 
+            setIsEdit(false)
+            setEditedData({})
+          }} />
       }
       {activeTab === 'logo' && 
         <PictureForm 
-          initialImage={(!!shopData && shopData.logo_url) || defaultImage}
+          initialImage={(!!editedData && editedData.logo_url) || defaultImage}
           onSubmit={(file) => onCommitChangeLogo(file)}
           onCancel={() => setIsEdit(false)} />
       }
@@ -108,15 +162,15 @@ const ShopProfilePage = () => {
           {!isLoading && <tbody>
             <tr className='bg-gray-100'>
               <td className='p-3 w-24'>Name</td>
-              <td className='p-3'>: {!!shopData ? shopData.name : '-'}</td>
+              <td className='p-3'>: {!!shopData.name ? shopData.name : '-'}</td>
             </tr>
             <tr className=''>
               <td className='p-3 w-24'>Address</td>
-              <td className='p-3'>: {!!shopData ? shopData.address : '-'}</td>
+              <td className='p-3'>: {!!shopData.address ? shopData.address : '-'}</td>
             </tr>
             <tr className='bg-gray-100'>
               <td className='p-3 w-24'>Phone</td>
-              <td className='p-3'>: {!!shopData ? shopData.phone : '-'}</td>
+              <td className='p-3'>: {!!shopData.phone ? shopData.phone : '-'}</td>
             </tr>
           </tbody>}
         </table>
@@ -129,6 +183,7 @@ const ShopProfilePage = () => {
               icon='pencil' 
               onClick={() => {
                 setIsEdit(true)
+                setEditedData(shopData)
               }}/>}
         </div>
       </div>

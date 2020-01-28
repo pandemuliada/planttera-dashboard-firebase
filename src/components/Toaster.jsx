@@ -43,6 +43,10 @@ const toastTypes = {
     border: 'border-l-4 border-red-400',
     title: 'text-red-500'
   },
+  warning: {
+    border: 'border-l-4 border-yellow-400',
+    title: 'text-yellow-500'
+  },
 }
 
 const Toast = (props) => {

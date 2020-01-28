@@ -72,7 +72,6 @@ const UserProfilePage = () => {
         })
       }
     } catch (error) {
-      console.log(error)
       if (error.code === 'auth/requires-recent-login') {
         setIsEdit(false)
         setToast({
@@ -153,18 +152,18 @@ const UserProfilePage = () => {
   
     <div className='flex items-start'>
       <div className='bg-white w-1/3 mr-5 py-4 px-6 shadow mb-8 rounded'>
-        <img className='mx-auto' src={(!!currentUser && currentUser.photoURL) || defaultImage} alt={!!currentUser ? currentUser.displayName : ''}/>
+        <img className='mx-auto' src={(!!currentUser && currentUser.photoURL) || defaultImage} alt={!!currentUser.displayName ? currentUser.displayName : ''}/>
       </div>
       <div className='bg-white w-2/3 py-4 px-6 shadow mb-8 rounded'>
         <table className='table-auto rounded w-full'>
           <tbody>
             <tr className='bg-gray-100'>
               <td className='p-3 w-24'>Name</td>
-              <td className='p-3'>: {!!currentUser ? currentUser.displayName : '-'}</td>
+              <td className='p-3'>: {!!currentUser.displayName ? currentUser.displayName : '-'}</td>
             </tr>
             <tr className='bg-white'>
               <td className='p-3 w-24'>Email</td>
-              <td className='p-3'>: {!!currentUser ? currentUser.email : '-'}</td>
+              <td className='p-3'>: {!!currentUser.email ? currentUser.email : '-'}</td>
             </tr>
           </tbody>
         </table>
