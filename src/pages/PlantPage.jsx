@@ -201,7 +201,7 @@ const PlantPage = () => {
   async function onCommitChangeImage(file) {
     const fileExtension = file.type.split('/')[1]
 
-    const storageRef = storage.ref('plants/' + 'plant_' + editedItem.id + "." +fileExtension)
+    const storageRef = storage.ref('plants/' + 'plant_' + editedItem.id + "." + fileExtension)
     const snapshot = await storageRef.put(file)
     const url = await snapshot.ref.getDownloadURL()
 

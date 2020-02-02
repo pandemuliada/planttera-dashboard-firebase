@@ -10,6 +10,11 @@ import { Button, IconButton } from '../components/buttons'
 import { ConfirmationDialog } from '../components/Dialog'
 import RoomForm from '../components/forms/RoomForm'
 
+import defaultImage from '../static/images/no-image.png'
+import Tabs from '../components/Tabs'
+import PictureForm from '../components/forms/PictureForm'
+import { storage } from '../firebase'
+
 const RoomPage = () => {
   const [tableData, setTableData] = useState({ meta: {}, data: [] })
   const [isLoading, setIsLoading] = useState(false)
@@ -20,6 +25,8 @@ const RoomPage = () => {
 
   const [editedItem, setEditedItem] = useState(null)
   const [deletedItem, setDeletedItem] = useState(null)
+
+  const [activeTab, setActiveTab] = useState('data')
 
   const defaultToastState = { 
     isShow: false, 
@@ -32,7 +39,10 @@ const RoomPage = () => {
     { 
       key: 'name', 
       label: 'Name',
-      render: (item) => (item.name)
+      render: ({ name, image_url }) => (<div className='flex items-center'>
+        <img src={image_url || defaultImage} className='w-10 h-10 mr-3 rounded-full' alt=""/>
+        <span>{name}</span>
+      </div>)
     },
     { 
       key: 'created_at', 
@@ -169,6 +179,30 @@ const RoomPage = () => {
     setDeletedItem(null)
   }
 
+  async function onCommitChangeImage(file) {
+    const fileExtension = file.type.split('/')[1]
+
+    const storageRef = storage.ref('rooms/' + 'room_' + editedItem.id + "." + fileExtension)
+    const snapshot = await storageRef.put(file)
+    const url = await snapshot.ref.getDownloadURL()
+
+    const updatedItem = await db.collection('rooms').doc(editedItem.id).update({
+      image_url: url
+    })
+    
+    if (snapshot.state === 'success' && updatedItem === undefined) {
+      onCancelEdit()
+      onLoadPage()
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Image Updated',
+        message: `${editedItem.name} image changed successfully` 
+      })
+    }
+  }
+
   return (<div>
     <Toaster
       isShow={toast.isShow}
@@ -185,10 +219,26 @@ const RoomPage = () => {
     </Panel>
     
     <Panel title='Room' size='small' isOpen={isEdit} onClose={() => onCancelEdit()}>
+      <div className='mb-5'>
+        <Tabs
+          items={[
+            { key: 'data', label: 'Data' }, 
+            { key: 'image', label: 'Image' }
+          ]} 
+          activeTab={activeTab}
+          onChangeTab={(key) => setActiveTab(key)} />
+      </div>
+      {activeTab === 'data' && 
       <RoomForm
         initialValues={editedItem}
         onSubmit={onCommitEdit}
-        onCancel={() => onCancelEdit()} />
+        onCancel={() => onCancelEdit()} />}
+      {activeTab === 'image' &&
+      <PictureForm
+        initialImage={(!!editedItem && editedItem.image_url) || defaultImage}
+        description="Note : Please upload 600px x 400px image (3:2)"
+        onSubmit={(file) => onCommitChangeImage(file)}
+        onCancel={() => onCancelEdit()} />}
     </Panel>
 
     <ConfirmationDialog

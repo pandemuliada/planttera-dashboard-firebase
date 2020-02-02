@@ -33,6 +33,7 @@ const PictureForm = (props) => {
     initialImage,
     onSubmit,
     onCancel,
+    description,
   } = props
 
   function onSubmitForm(values, callback) {
@@ -46,9 +47,10 @@ const PictureForm = (props) => {
       <img src={initialImage} alt=""/>
     </div>
     <Formik initialValues={defaultValues} onSubmit={onSubmitForm} validationSchema={pictureFormSchema}>
-      {({ values, handleSubmit, isSubmitting, handleReset, setFieldValue,   errors }) => {
+      {({ values, handleSubmit, isSubmitting, handleReset, setFieldValue, errors }) => {
         return (<form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className='mb-5'>
+            <p className='text-gray-600 text-sm italic mb-2 mt-2'>{description}</p>
             <label className={`text-gray-600 px-4 py-3 cursor-pointer w-full block text-sm border-dashed border-2 ${isSubmitting ? 'cursor-not-allowed' : 'cursor-auto'} ${errors.file ? 'border-red-400 bg-red-100' : 'border-blue-200 bg-gray-100'}`}>
               <span>{!!values.file ? values.file.name : 'Browse file'}</span>
               <div className='hidden'>
