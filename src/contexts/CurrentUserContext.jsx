@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { auth } from '../firebase'
+import { privateApi } from '../utils/request'
 
 export const CurrentUserContext = React.createContext()
 
@@ -8,34 +8,28 @@ export const useCurrentUser = () => {
 }
 
 export const CurrentUserProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState({
-    displayName: '',
-    email: '',
-    photoURL: '',
-  })
+  const [currentUser, setCurrentUser] = useState(null)
 
   // Check if user logged in or not
   useEffect(() => {
     getCurrentUser()
   }, [])
 
-  function getCurrentUser() {
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        setCurrentUser(user)
-      } else {
-        setCurrentUser(null)
-      }
-    })
+  async function getCurrentUser() {
+    const response = await privateApi().get('users/current_user')
+
+    if (!!response.data.data) {
+      setCurrentUser(response.data.data)
+    } else {
+      setCurrentUser(null)
+    }
   }
 
   const authStore = {
     currentUser,
     setCurrentUser,
-    getCurrentUser
+    getCurrentUser,
   }
-  
-  return(<CurrentUserContext.Provider value={authStore}>
-    {children}
-  </CurrentUserContext.Provider>)
+
+  return <CurrentUserContext.Provider value={authStore}>{children}</CurrentUserContext.Provider>
 }

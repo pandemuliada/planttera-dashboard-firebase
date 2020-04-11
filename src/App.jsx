@@ -14,22 +14,24 @@ import ShopProfilePage from './pages/ShopProfilePage'
 import UserAccountPage from './pages/UserAccountPage'
 
 const App = () => {
-  return (<CurrentUserProvider>
-    <Router>
-      <Switch>
-        <Route exact path='/login' component={LoginPage} />
-        <PageContainer>
-          <PrivateRoute exact path='/' component={DashboardPage} />
-          <PrivateRoute exact path='/dashboard' component={DashboardPage} />
-          <PrivateRoute exact path='/plants' component={PlantPage} />
-          <PrivateRoute exact path='/shop-profile' component={ShopProfilePage} />
-          <PrivateRoute exact path='/master-data/categories' component={CategoryPage} />
-          <PrivateRoute exact path='/master-data/rooms' component={RoomPage} />
-          <PrivateRoute exact path='/settings/account' component={UserAccountPage} />
-        </PageContainer>
-      </Switch>
-    </Router>
-  </CurrentUserProvider>)
+  return (
+    <CurrentUserProvider>
+      <Router>
+        <Switch>
+          <Route exact path="/login" component={LoginPage} />
+          <PageContainer>
+            <PrivateRoute exact path="/" component={DashboardPage} />
+            <PrivateRoute exact path="/dashboard" component={DashboardPage} />
+            <PrivateRoute exact path="/plants" component={PlantPage} />
+            <PrivateRoute exact path="/shop-profile" component={ShopProfilePage} />
+            <PrivateRoute exact path="/master-data/categories" component={CategoryPage} />
+            <PrivateRoute exact path="/master-data/rooms" component={RoomPage} />
+            <PrivateRoute exact path="/settings/account" component={UserAccountPage} />
+          </PageContainer>
+        </Switch>
+      </Router>
+    </CurrentUserProvider>
+  )
 }
 
 export default App
