@@ -1,6 +1,8 @@
 import React, { useContext } from 'react'
 import dayjs from 'dayjs'
 import { useState } from 'react'
+import fs from 'fs'
+
 import { auth, storage } from '../firebase'
 import { CurrentUserContext } from '../contexts/CurrentUserContext'
 
@@ -18,7 +20,7 @@ import { privateApi } from '../utils/request'
 const UserProfilePage = () => {
   const { currentUser, getCurrentUser } = useContext(CurrentUserContext)
   const [isEdit, setIsEdit] = useState(false)
-  const [activeTab, setActiveTab] = useState('profile')
+  const [activeTab, setActiveTab] = useState('picture')
 
   const defaultToastState = {
     isShow: false,
@@ -71,23 +73,22 @@ const UserProfilePage = () => {
   }
 
   async function onCommitChangePicture(file) {
-    // const fileExtension = file.type.split('/')[1]
-    // const storageRef = storage.ref('profiles/' + 'user_' + currentUser.uid + '.' + fileExtension)
-    // const snapshot = await storageRef.put(file)
-    // const url = await snapshot.ref.getDownloadURL()
-    // const updatedProfile = await auth.currentUser.updateProfile({
-    //   photoURL: url,
-    // })
-    // if (snapshot.state === 'success' && updatedProfile === undefined) {
-    //   setIsEdit(false)
-    //   setToast({
-    //     ...toast,
-    //     isShow: true,
-    //     type: 'primary',
-    //     title: 'Picture Updated',
-    //     message: 'Profile picture changed successfully',
-    //   })
-    // }
+    const formData = new FormData()
+    formData.append('picture', file)
+
+    const response = await privateApi().put(`users/change_picture/${currentUser.id}`, formData)
+
+    if (response && response.data.data) {
+      setIsEdit(false)
+      getCurrentUser()
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Picture Updated',
+        message: 'Profile picture changed successfully!',
+      })
+    }
   }
 
   return (
