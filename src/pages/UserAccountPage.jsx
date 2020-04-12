@@ -20,13 +20,14 @@ import { privateApi } from '../utils/request'
 const UserProfilePage = () => {
   const { currentUser, getCurrentUser } = useContext(CurrentUserContext)
   const [isEdit, setIsEdit] = useState(false)
-  const [activeTab, setActiveTab] = useState('picture')
+  const [activeTab, setActiveTab] = useState('password')
 
   const defaultToastState = {
     isShow: false,
     type: 'default',
     duration: 4000, // remove duration property to prevent autoclose after 4s
   }
+
   const [toast, setToast] = useState(defaultToastState)
 
   async function onCommitEditData(values) {
@@ -39,36 +40,24 @@ const UserProfilePage = () => {
         ...toast,
         isShow: true,
         type: 'primary',
-        title: 'User Updated',
+        title: 'Data Updated',
         message: 'Your data has been updated!',
       })
     }
   }
 
   async function onCommitChangePassword(values) {
-    try {
-      const updatedPassword = await auth.currentUser.updatePassword(values.password)
-      if (updatedPassword === undefined) {
-        setIsEdit(false)
-        setToast({
-          ...toast,
-          isShow: true,
-          type: 'primary',
-          title: 'Password Updated',
-          message: 'Password updated successfully',
-        })
-      }
-    } catch (error) {
-      if (error.code === 'auth/requires-recent-login') {
-        setIsEdit(false)
-        setToast({
-          ...toast,
-          isShow: true,
-          type: 'danger',
-          title: 'Sensitive Operation',
-          message: 'Login again before retrying change your password',
-        })
-      }
+    const response = await privateApi().put('users/current_user/change_password', { ...values })
+
+    if (response && response.data.data) {
+      setIsEdit(false)
+      setToast({
+        ...toast,
+        isShow: true,
+        type: 'primary',
+        title: 'Password Updated',
+        message: 'Your password has been updated!',
+      })
     }
   }
 
@@ -86,7 +75,7 @@ const UserProfilePage = () => {
         isShow: true,
         type: 'primary',
         title: 'Picture Updated',
-        message: 'Profile picture changed successfully!',
+        message: 'Your picture has been updated!',
       })
     }
   }

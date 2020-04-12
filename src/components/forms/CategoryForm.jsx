@@ -10,7 +10,7 @@ const defaultValues = {
 }
 
 const categoryFormSchema = object().shape({
-  name: string().required('Cannot be empty'),
+  name: string().required('Cannot be empty!'),
 })
 
 const CategoryForm = props => {

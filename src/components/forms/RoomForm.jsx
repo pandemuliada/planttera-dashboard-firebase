@@ -10,7 +10,7 @@ const defaultValues = {
 }
 
 const roomFormSchema = object().shape({
-  name: string().required('Cannot be empty'),
+  name: string().required('Cannot be empty!'),
 })
 
 const RoomForm = props => {
