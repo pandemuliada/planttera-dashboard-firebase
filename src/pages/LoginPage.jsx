@@ -1,17 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { Formik } from 'formik'
 import { object, string } from 'yup'
-import { auth } from '../firebase'
-import { CurrentUserContext } from '../contexts/CurrentUserContext'
-import { Redirect, useHistory } from 'react-router'
+import { useHistory } from 'react-router'
 
+import { CurrentUserContext } from '../contexts/CurrentUserContext'
 import { FormikTextField } from '../components/inputs'
 import { Button } from '../components/buttons'
 
-import background from '../static/images/login-bg.jpg'
-import { useContext } from 'react'
 import { api } from '../utils/request'
 import { setLocalStorage, removeLocalStorage } from '../utils/helper'
+import { formatError } from '../utils/format'
+
+import background from '../static/images/login-bg.jpg'
 
 const initialValues = {
   email: '',
@@ -29,7 +29,8 @@ const LoginPage = () => {
   let history = useHistory()
 
   const { currentUser, getCurrentUser } = useContext(CurrentUserContext)
-  const [isFailed, setIsFailed] = useState(false)
+  const [isError, setIsError] = useState(false)
+  const [errors, setErrors] = useState({})
 
   if (!!currentUser) {
     history.push('/dashboard')
@@ -38,18 +39,24 @@ const LoginPage = () => {
   async function login(values) {
     const { email, password } = values
 
-    const response = await api().post('users/login', {
-      email,
-      password,
-    })
-
-    if (response.data.data.token) {
-      setLocalStorage('token', response.data.data.token)
-      getCurrentUser()
-      history.push('/dashboard')
-    } else {
-      removeLocalStorage('token')
-    }
+    api()
+      .post('users/login', {
+        email,
+        password,
+      })
+      .then(response => {
+        if (response.data.data.token) {
+          setIsError(false)
+          setLocalStorage('token', response.data.data.token)
+          getCurrentUser()
+          history.push('/dashboard')
+        }
+      })
+      .catch(error => {
+        setIsError(true)
+        setErrors(formatError(error.response.data.errors))
+        removeLocalStorage('token')
+      })
   }
 
   return (
@@ -73,7 +80,7 @@ const LoginPage = () => {
                   return (
                     <form onSubmit={handleSubmit}>
                       <h1 className="text-4xl text-teal-500 mb-8 font-bold">Login to Dashboard</h1>
-                      {isFailed && (
+                      {isError && (
                         <p className="text-red-500 mb-5 italic">
                           Login failed, <br /> Please check your email & password
                         </p>
@@ -84,12 +91,14 @@ const LoginPage = () => {
                         label="Email"
                         name="email"
                         placeholder="useremail@mail.com"
+                        error={errors.email}
                       />
                       <FormikTextField
                         type="password"
                         name="password"
                         label="Password"
                         placeholder="*************"
+                        error={errors.password}
                       />
                       <div className="mt-8">
                         <Button

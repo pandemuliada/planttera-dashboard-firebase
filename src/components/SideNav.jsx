@@ -148,7 +148,6 @@ const SideNav = () => {
     removeLocalStorage('token')
     setCurrentUser(null)
     return <Redirect to="/login" />
-    // history.push('/login')
   }
 
   return (
