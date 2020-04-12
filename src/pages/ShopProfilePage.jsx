@@ -9,6 +9,8 @@ import PictureForm from '../components/forms/PictureForm'
 import SkeletonLoader from '../components/SkeletonLoader'
 import Toaster from '../components/Toaster'
 
+import { privateApi } from '../utils/request'
+
 import defaultImage from '../static/images/no-image.png'
 
 const ShopProfilePage = () => {
@@ -16,7 +18,7 @@ const ShopProfilePage = () => {
     name: '',
     address: '',
     phone: '',
-    logo_url: ''
+    logo: '',
   }
 
   const [shopData, setShopData] = useState(defaultShopData)
@@ -25,13 +27,12 @@ const ShopProfilePage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('data')
 
-  const defaultToastState = { 
-    isShow: false, 
+  const defaultToastState = {
+    isShow: false,
     type: 'default',
-    duration: 3000, // remove duration property to prevent autoclose after 4s 
+    duration: 3000, // remove duration property to prevent autoclose after 4s
   }
   const [toast, setToast] = useState(defaultToastState)
-
 
   useEffect(() => {
     getShopData()
@@ -39,37 +40,28 @@ const ShopProfilePage = () => {
 
   async function getShopData() {
     setIsLoading(true)
+    const response = await privateApi().get('shop')
 
-    try {
-      const doc = await db.collection('shops').doc('shop-profile').get()
-    
-      if (doc.exists) {
-        setShopData(doc.data())
-        setIsLoading(false)
-      } else {
-        setIsLoading(false)
-        setShopData({...defaultShopData})
-      }
-      
-    } catch (error) {
+    if (response && response.data.data) {
       setIsLoading(false)
+      setShopData({ ...response.data.data })
+    } else {
+      setIsLoading(false)
+      setShopData({ ...defaultShopData })
       setToast({
         ...toast,
         isShow: true,
-        type: 'warning',
-        title: 'Network Problem',
-        message: 'Cant\'t get shop data, reload the page' 
+        type: 'danger',
+        title: 'Error',
+        message: "Cant't find shop data!",
       })
     }
-
   }
 
   async function onCommitEditData(values) {
-    const edited = await db.collection('shops').doc('shop-profile').set({
-      ...values
-    })
+    const response = await privateApi().put('shop/update', { ...values })
 
-    if (edited === undefined) {
+    if (response && response.data.data) {
       setIsEdit(false)
       getShopData()
       setToast({
@@ -77,24 +69,18 @@ const ShopProfilePage = () => {
         isShow: true,
         type: 'primary',
         title: 'Data Updated',
-        message: 'Shop data has been updated' 
+        message: 'Shop data has been updated!',
       })
     }
   }
 
   async function onCommitChangeLogo(file) {
-    const fileExtension = file.type.split('/')[1]
+    const formData = new FormData()
+    formData.append('logo', file)
 
-    const storageRef = storage.ref('shops/' + shopData.name + '.' + fileExtension)
-    const snapshot = await storageRef.put(file)
-    const url = await snapshot.ref.getDownloadURL()
+    const response = await privateApi().put('shop/change_logo', formData)
 
-    const updated = await db.collection('shops').doc('shop-profile').set({
-      ...shopData,
-      logo_url:  url,
-    })
-    
-    if (snapshot.state === 'success' && updated === undefined) {
+    if (response && response.data.data) {
       setIsEdit(false)
       getShopData()
       setToast({
@@ -102,93 +88,114 @@ const ShopProfilePage = () => {
         isShow: true,
         type: 'primary',
         title: 'Logo Updated',
-        message: 'Shop logo changed successfully' 
+        message: 'Shop logo has been updated!',
       })
     }
   }
 
-  return (<div>
-    <Toaster
-      isShow={toast.isShow}
-      type={toast.type}
-      duration={toast.duration}
-      title={toast.title}
-      message={toast.message}
-      onClose={() => setToast({...toast, ...defaultToastState})}/>
+  return (
+    <div>
+      <Toaster
+        isShow={toast.isShow}
+        type={toast.type}
+        duration={toast.duration}
+        title={toast.title}
+        message={toast.message}
+        onClose={() => setToast({ ...toast, ...defaultToastState })}
+      />
 
-    <Panel title='Shop Profile' size='small' isOpen={isEdit} 
-      onClose={() => { 
-        setIsEdit(false)
-        setEditedData(shopData)
-      } }>
-      <div className='mb-5'>
-        <Tabs 
-          items={[
-            { key: 'data', label: 'Data' },
-            { key: 'logo', label: 'Logo' },
-          ]}
-          activeTab={activeTab}
-          onChangeTab={(key) => setActiveTab(key)}
-        />
-      </div>
-      {activeTab === 'data' && 
-        <ShopProfileForm
-          initialValues={!!editedData && editedData}
-          onSubmit={onCommitEditData} 
-          onCancel={() => { 
-            setIsEdit(false)
-            setEditedData({})
-          }} />
-      }
-      {activeTab === 'logo' && 
-        <PictureForm 
-          initialImage={(!!editedData && editedData.logo_url) || defaultImage}
-          onSubmit={(file) => onCommitChangeLogo(file)}
-          onCancel={() => setIsEdit(false)} />
-      }
-    </Panel>
+      <Panel
+        title="Shop Profile"
+        size="small"
+        isOpen={isEdit}
+        onClose={() => {
+          setIsEdit(false)
+          setEditedData(shopData)
+        }}
+      >
+        <div className="mb-5">
+          <Tabs
+            items={[
+              { key: 'data', label: 'Data' },
+              { key: 'logo', label: 'Logo' },
+            ]}
+            activeTab={activeTab}
+            onChangeTab={key => setActiveTab(key)}
+          />
+        </div>
+        {activeTab === 'data' && (
+          <ShopProfileForm
+            initialValues={!!editedData && editedData}
+            onSubmit={onCommitEditData}
+            onCancel={() => {
+              setIsEdit(false)
+              setEditedData({})
+            }}
+          />
+        )}
+        {activeTab === 'logo' && (
+          <PictureForm
+            initialImage={(!!editedData && editedData.logo) || defaultImage}
+            onSubmit={file => onCommitChangeLogo(file)}
+            onCancel={() => setIsEdit(false)}
+          />
+        )}
+      </Panel>
 
-    <div className='flex items-center bg-white py-4 px-6 shadow mb-6 rounded'>
-      <h1 className='text-2xl font-medium text-gray-600'>Shop Profile</h1>
-      <span className='ml-auto text-gray-600'>{dayjs().format("dddd, MMMM D YYYY")}</span>
-    </div>
-  
-    <div className='flex items-start'>
-      <div className='bg-white w-1/3 mr-5 py-4 px-6 shadow mb-8 rounded justify-center'>
-        {isLoading ? <SkeletonLoader height={150} /> : <img className='mx-auto' src={(!!shopData && shopData.logo_url) || defaultImage} alt={!!shopData ? shopData.name : ''}/>}
+      <div className="flex items-center bg-white py-4 px-6 shadow mb-6 rounded">
+        <h1 className="text-2xl font-medium text-gray-600">Shop Profile</h1>
+        <span className="ml-auto text-gray-600">{dayjs().format('dddd, MMMM D YYYY')}</span>
       </div>
-      <div className='bg-white w-2/3 py-4 px-6 shadow mb-8 rounded'>
-        <table className='table-auto rounded w-full'>
-          {!isLoading && <tbody>
-            <tr className='bg-gray-100'>
-              <td className='p-3 w-24'>Name</td>
-              <td className='p-3'>: {!!shopData.name ? shopData.name : '-'}</td>
-            </tr>
-            <tr className=''>
-              <td className='p-3 w-24'>Address</td>
-              <td className='p-3'>: {!!shopData.address ? shopData.address : '-'}</td>
-            </tr>
-            <tr className='bg-gray-100'>
-              <td className='p-3 w-24'>Phone</td>
-              <td className='p-3'>: {!!shopData.phone ? shopData.phone : '-'}</td>
-            </tr>
-          </tbody>}
-        </table>
-        {isLoading && <SkeletonLoader  count={3} height={35} />}
-        <div className='flex justify-end mt-4'>
-          {!isLoading && 
-            <IconButton
-              outline 
-              size='small' 
-              icon='pencil' 
-              onClick={() => {
-                setIsEdit(true)
-                setEditedData(shopData)
-              }}/>}
+
+      <div className="flex items-start">
+        <div className="bg-white w-1/3 mr-5 py-4 px-6 shadow mb-8 rounded justify-center">
+          {isLoading ? (
+            <SkeletonLoader height={150} />
+          ) : (
+            <img
+              className="mx-auto"
+              src={(!!shopData && shopData.logo) || defaultImage}
+              alt={!!shopData ? shopData.name : ''}
+            />
+          )}
+        </div>
+        <div className="bg-white w-2/3 py-4 px-6 shadow mb-8 rounded">
+          <table className="table-auto rounded w-full">
+            {!isLoading && (
+              <tbody>
+                <tr className="bg-gray-100">
+                  <td className="p-3 w-24">Name</td>
+                  <td className="p-3">: {!!shopData.name ? shopData.name : '-'}</td>
+                </tr>
+                <tr className="">
+                  <td className="p-3 w-24">Address</td>
+                  <td className="p-3">: {!!shopData.address ? shopData.address : '-'}</td>
+                </tr>
+                <tr className="bg-gray-100">
+                  <td className="p-3 w-24">Phone</td>
+                  <td className="p-3">: {!!shopData.phone ? shopData.phone : '-'}</td>
+                </tr>
+              </tbody>
+            )}
+          </table>
+          {isLoading && <SkeletonLoader count={3} height={35} />}
+          <div className="flex justify-end mt-4">
+            {!isLoading && (
+              <IconButton
+                outline
+                size="small"
+                icon="pencil"
+                onClick={() => {
+                  setIsEdit(true)
+                  setEditedData(shopData)
+                }}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
-  </div>)
+  )
 }
 
 export default ShopProfilePage
