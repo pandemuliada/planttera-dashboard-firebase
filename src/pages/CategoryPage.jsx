@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 import { IoIosCreate, IoIosTrash } from 'react-icons/io'
-import { db } from '../firebase'
+
 import Table from '../components/Table'
 import Panel from '../components/Panel'
 import Toaster from '../components/Toaster'
@@ -9,6 +9,7 @@ import { TextField } from '../components/inputs'
 import { Button, IconButton } from '../components/buttons'
 import { ConfirmationDialog } from '../components/Dialog'
 import CategoryForm from '../components/forms/CategoryForm'
+
 import { privateApi } from '../utils/request'
 
 const CategoryPage = () => {
@@ -130,7 +131,7 @@ const CategoryPage = () => {
         isShow: true,
         type: 'primary',
         title: 'Category Updated',
-        message: `${editedItem.name} category has been updated successfully!`,
+        message: `${editedItem.name} has been updated successfully!`,
       })
     }
   }
@@ -151,7 +152,7 @@ const CategoryPage = () => {
         isShow: true,
         type: 'primary',
         title: 'Category Deleted',
-        message: `${deletedItem.name} category has been deleted!`,
+        message: `${deletedItem.name} has been deleted!`,
       })
     }
   }
