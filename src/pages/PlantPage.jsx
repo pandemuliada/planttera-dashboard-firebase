@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 import { IoIosCreate, IoIosTrash } from 'react-icons/io'
-import { db, storage } from '../firebase'
 import Table from '../components/Table'
 import Panel from '../components/Panel'
 import Tabs from '../components/Tabs'
@@ -13,6 +12,7 @@ import PlantForm from '../components/forms/PlantForm'
 import PictureForm from '../components/forms/PictureForm'
 
 import defaultImage from '../static/images/no-image.png'
+import { privateApi, url } from '../utils/request'
 
 const PlantPage = () => {
   const [tableData, setTableData] = useState({ meta: {}, data: [] })
@@ -27,69 +27,82 @@ const PlantPage = () => {
 
   const [activeTab, setActiveTab] = useState('data')
 
-  const defaultToastState = { 
-    isShow: false, 
+  const defaultToastState = {
+    isShow: false,
     type: 'default',
-    duration: 4000, // remove duration property to prevent autoclose after 4s 
+    duration: 4000, // remove duration property to prevent autoclose after 4s
   }
   const [toast, setToast] = useState(defaultToastState)
 
   const columns = [
-    { 
-      key: 'name', 
+    {
+      key: 'name',
       label: 'Name',
-      render: ({ name, image_url }) => (
-        <div className='flex items-center'>
-          <img src={image_url || defaultImage} className='w-10 h-10 mr-3 rounded-full' alt=""/>
+      render: ({ name, picture }) => (
+        <div className="flex items-center">
+          <img
+            src={(picture && url(`static/images/plants/${picture}`)) || defaultImage}
+            className="w-10 h-10 mr-3 rounded-full"
+            alt=""
+          />
           <span>{name}</span>
         </div>
-      )
+      ),
     },
-    { 
-      key: 'price', 
+    {
+      key: 'price',
       label: 'Price',
-      render: ({price}) => ('Rp. ' + price)
+      render: ({ price }) => 'Rp. ' + price,
     },
-    { 
-      key: 'stock', 
+    {
+      key: 'stock',
       label: 'Stock',
     },
-    { 
-      key: 'available', 
+    {
+      key: 'available',
       label: 'Status',
-      render: ({ available }) => (available ? 'Available' : 'Not available')
+      render: ({ available }) => (available ? 'Available' : 'Not available'),
     },
-    { 
-      key: 'category', 
+    {
+      key: 'category',
       label: 'Category',
-      render: ({ category: { label } }) => label
+      render: ({ category: { name } }) => name,
     },
-    { 
-      key: 'created_at', 
+    {
+      key: 'room',
+      label: 'Room',
+      render: ({ room: { name } }) => name,
+    },
+    {
+      key: 'created_at',
       label: 'Created at',
-      render: ({ created_at }) => dayjs(created_at).format('dddd, MMMM D YYYY')
+      render: ({ createdAt }) => dayjs(createdAt).format('dddd, MMMM D YYYY'),
     },
-    { 
-      key: 'options', 
+    {
+      key: 'options',
       label: 'Options',
-      render: ({ id, name, category: { key : category_id}, room: { key: room_id }, stock, price, available, image_url }) => (<div className='flex items-center'>
-        <button 
-          className='p-1 text-gray-400 hover:text-yellow-400' 
-          onClick={() => { 
-            setIsEdit(true) 
-            setEditedItem({ id, name, category_id, room_id, stock, price, available, image_url })
-          }}>
-          <IoIosCreate size={22}/>
-        </button>
-        <button 
-          className='p-1 text-gray-400 hover:text-red-400' 
-          onClick={() => {
-            setIsDelete(true)
-            setDeletedItem({ id, name })
-          }}>
-          <IoIosTrash size={22}/>
-        </button>
-      </div>)
+      render: ({ category: { id: categoryId }, room: { id: roomId }, ...data }) => (
+        <div className="flex items-center">
+          <button
+            className="p-1 text-gray-400 hover:text-yellow-400"
+            onClick={() => {
+              setIsEdit(true)
+              setEditedItem({ categoryId, roomId, ...data })
+            }}
+          >
+            <IoIosCreate size={22} />
+          </button>
+          <button
+            className="p-1 text-gray-400 hover:text-red-400"
+            onClick={() => {
+              setIsDelete(true)
+              setDeletedItem(data)
+            }}
+          >
+            <IoIosTrash size={22} />
+          </button>
+        </div>
+      ),
     },
   ]
 
@@ -98,74 +111,64 @@ const PlantPage = () => {
   }, [])
 
   async function onLoadPage() {
-    const data = []
     setIsLoading(true)
-    try {
-      const docs = await db.collection('plants').orderBy('name', 'asc').get()
-      
-      docs.forEach((doc) => {
-        data.push({
-          id: doc.id,
-          ...doc.data()
-        })
+
+    const response = await privateApi()
+      .get('plants')
+      .catch(error => {
+        if (error.response.status == 404) {
+          setToast({
+            ...toast,
+            isShow: true,
+            type: 'warning',
+            title: 'Not Found',
+            message: "There's no plant!",
+          })
+          setIsLoading(false)
+        }
       })
-      
+
+    if (response && response.data.data) {
+      const data = response.data.data
       const newTableData = {
         meta: { count: data.length },
-        data
+        data,
       }
-  
-      if (newTableData) setIsLoading(false)
-      setTableData({...newTableData})
-    } catch (error) {
-      setToast({
-        ...toast,
-        isShow: true,
-        type: 'warning',
-        title: 'Network Problem',
-        message: 'Cant\'t get plant data, reload the page' 
-      })
+      setIsLoading(false)
+      setTableData(newTableData)
     }
   }
 
   async function onCommitAdd(values) {
-    setIsLoading(true)
-    const saved = await db.collection("plants").add({
-      ...values,
-      created_at: Date.now()
-    })
+    const response = await privateApi().post('plants', { ...values })
 
-    if (saved) {
+    if (response) {
       setIsAdd(false)
-      setIsLoading(false)
       onLoadPage()
       setToast({
         ...toast,
         isShow: true,
         type: 'primary',
-        title: 'Plant Added',
-        message: 'A new plant has been added' 
+        title: 'Plant Created',
+        message: 'A new plant has been created!',
       })
     }
   }
 
   async function onCommitEdit(values) {
-    setIsLoading(true)
-    const edited = await db.collection("plants").doc(editedItem.id).update({
+    const response = await privateApi().put(`plants/${editedItem.id}`, {
       ...values,
-      updated_at: Date.now()
     })
 
-    if (edited === undefined) {
+    if (response && response.data.data) {
       onCancelEdit()
-      setIsLoading(false)
       onLoadPage()
       setToast({
         ...toast,
         isShow: true,
         type: 'primary',
         title: 'Plant Updated',
-        message: `${editedItem.name} updated successfully` 
+        message: `${editedItem.name} has been updated successfully!`,
       })
     }
   }
@@ -176,19 +179,17 @@ const PlantPage = () => {
   }
 
   async function onCommitDelete(item) {
-    setIsLoading(true)
-    const deleted = await db.collection('plants').doc(item.id).delete()
+    const response = await privateApi().delete(`plants/${item.id}`)
 
-    if (deleted === undefined) {
+    if (response) {
       onCancelDelete()
-      setIsLoading(false)
       onLoadPage()
       setToast({
         ...toast,
         isShow: true,
         type: 'primary',
-        title: 'Plant Updated',
-        message: `${deletedItem.name} deleted successfully` 
+        title: 'Plant Deleted',
+        message: `${deletedItem.name} has been deleted!`,
       })
     }
   }
@@ -199,102 +200,105 @@ const PlantPage = () => {
   }
 
   async function onCommitChangeImage(file) {
-    const fileExtension = file.type.split('/')[1]
+    const formData = new FormData()
+    formData.append('picture', file)
 
-    const storageRef = storage.ref('plants/' + 'plant_' + editedItem.id + "." + fileExtension)
-    const snapshot = await storageRef.put(file)
-    const url = await snapshot.ref.getDownloadURL()
+    const response = await privateApi().put(`plants/change_picture/${editedItem.id}`, formData)
 
-    const updatedItem = await db.collection('plants').doc(editedItem.id).update({
-      image_url: url
-    })
-    
-    if (snapshot.state === 'success' && updatedItem === undefined) {
+    if (response && response.data.data) {
       onCancelEdit()
       onLoadPage()
       setToast({
         ...toast,
         isShow: true,
         type: 'primary',
-        title: 'Image Updated',
-        message: `${editedItem.name} image changed successfully` 
+        title: 'Picture Updated',
+        message: `${editedItem.name} picture changed successfully!`,
       })
     }
   }
 
-  return (<div>
-    <Toaster
-      isShow={toast.isShow}
-      type={toast.type}
-      duration={toast.duration}
-      title={toast.title}
-      message={toast.message}
-      onClose={() => setToast({...toast, ...defaultToastState})}/>
-
-    <Panel title='Plant' size='small' isOpen={isAdd} onClose={() => setIsAdd(false)}>
-      <PlantForm
-        onSubmit={onCommitAdd}
-        onCancel={() => setIsAdd(false)} />
-    </Panel>
-    
-    <Panel title='Plant' size='small' isOpen={isEdit} onClose={() => onCancelEdit()}>
-      <div className='mb-5'>
-        <Tabs
-          items={[
-            { key: 'data', label: 'Data' }, 
-            { key: 'image', label: 'Image' }
-          ]} 
-          activeTab={activeTab}
-          onChangeTab={(key) => setActiveTab(key)} />
-      </div>
-      {activeTab === 'data' &&
-      <PlantForm
-        initialValues={editedItem}
-        onSubmit={onCommitEdit}
-        onCancel={() => onCancelEdit()} />}
-      
-      {activeTab === 'image' &&
-      <PictureForm
-        initialImage={(!!editedItem && editedItem.image_url) || defaultImage}
-        onSubmit={(file) => onCommitChangeImage(file)}
-        onCancel={() => onCancelEdit()} />}
-    </Panel>
-
-    <ConfirmationDialog
-      isOpen={isDelete} 
-      onClose={() => onCancelDelete()}
-      onAccept={() => onCommitDelete(deletedItem)}
-      color='danger'
-      title='Delete Plant'
-      descriptions='Are you sure want to delete this plant?'/>
-
-    <div className='flex items-center bg-white py-4 px-6 shadow mb-6 rounded'>
-      <h1 className='text-2xl font-medium text-gray-600'>Plant</h1>
-      <span className='ml-auto text-gray-600'>{dayjs().format("dddd, MMMM D YYYY")}</span>
-    </div>
-  
-  
-    <div className='bg-white py-4 px-6 shadow mb-8 rounded'>
-
-      <div className='mb-6 flex'>
-        <div>
-          <Button color='primary' icon='add' size='small' onClick={() => setIsAdd(true)}>Add Plant</Button>
-        </div>
-        <div className='ml-auto flex'>
-          <div className='mr-1 w-64'>
-            <TextField noMargin size='small' name='name' placeholder='Find plant'/>
-          </div>
-          <IconButton icon='search' size='small'/>
-        </div>
-      </div>
-
-      <Table
-        tableData={tableData}
-        columns={columns}
-        loading={isLoading}
+  return (
+    <div>
+      <Toaster
+        isShow={toast.isShow}
+        type={toast.type}
+        duration={toast.duration}
+        title={toast.title}
+        message={toast.message}
+        onClose={() => setToast({ ...toast, ...defaultToastState })}
       />
+
+      <Panel title="Plant" size="small" isOpen={isAdd} onClose={() => setIsAdd(false)}>
+        <PlantForm onSubmit={onCommitAdd} onCancel={() => setIsAdd(false)} />
+      </Panel>
+
+      <Panel title="Plant" size="small" isOpen={isEdit} onClose={() => onCancelEdit()}>
+        <div className="mb-5">
+          <Tabs
+            items={[
+              { key: 'data', label: 'Data' },
+              { key: 'image', label: 'Image' },
+            ]}
+            activeTab={activeTab}
+            onChangeTab={key => setActiveTab(key)}
+          />
+        </div>
+        {activeTab === 'data' && (
+          <PlantForm
+            initialValues={editedItem}
+            onSubmit={onCommitEdit}
+            onCancel={() => onCancelEdit()}
+          />
+        )}
+
+        {activeTab === 'image' && (
+          <PictureForm
+            initialImage={
+              (!!editedItem &&
+                editedItem.picture &&
+                url(`static/images/plants/${editedItem.picture}`)) ||
+              defaultImage
+            }
+            onSubmit={file => onCommitChangeImage(file)}
+            onCancel={() => onCancelEdit()}
+          />
+        )}
+      </Panel>
+
+      <ConfirmationDialog
+        isOpen={isDelete}
+        onClose={() => onCancelDelete()}
+        onAccept={() => onCommitDelete(deletedItem)}
+        color="danger"
+        title="Delete Plant"
+        descriptions="Are you sure want to delete this plant?"
+      />
+
+      <div className="flex items-center bg-white py-4 px-6 shadow mb-6 rounded">
+        <h1 className="text-2xl font-medium text-gray-600">Plant</h1>
+        <span className="ml-auto text-gray-600">{dayjs().format('dddd, MMMM D YYYY')}</span>
+      </div>
+
+      <div className="bg-white py-4 px-6 shadow mb-8 rounded">
+        <div className="mb-6 flex">
+          <div>
+            <Button color="primary" icon="add" size="small" onClick={() => setIsAdd(true)}>
+              Add Plant
+            </Button>
+          </div>
+          <div className="ml-auto flex">
+            <div className="mr-1 w-64">
+              <TextField noMargin size="small" name="name" placeholder="Find plant" />
+            </div>
+            <IconButton icon="search" size="small" />
+          </div>
+        </div>
+
+        <Table tableData={tableData} columns={columns} loading={isLoading} />
+      </div>
     </div>
-  </div>)
+  )
 }
 
 export default PlantPage

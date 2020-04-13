@@ -13,13 +13,13 @@ const sizes = {
   },
   large: {
     label: 'text-lg',
-    input: 'py-3 px-5'
+    input: 'py-3 px-5',
   },
 }
 
 const SelectField = React.forwardRef((props, ref) => {
-  const { 
-    label, 
+  const {
+    label,
     options,
     error,
     touched,
@@ -28,24 +28,19 @@ const SelectField = React.forwardRef((props, ref) => {
     initialError,
     noMargin,
     placeholder,
-    size='normal',
+    optionKeyRef,
+    optionValueRef,
+    optionPlaceholderRef,
+    size = 'normal',
     ...rest
   } = props
 
   const styles = {
     wrapper: {
-      default: [
-        'w-full',
-        label && 'flex flex-col',
-        noMargin ? 'mb-0': 'mb-4',
-      ]
+      default: ['w-full', label && 'flex flex-col', noMargin ? 'mb-0' : 'mb-4'],
     },
     label: {
-      default: [
-        'text-gray-600',
-        'mb-1',
-        size ? sizes[size].label : sizes['normal'].label,
-      ]
+      default: ['text-gray-600', 'mb-1', size ? sizes[size].label : sizes['normal'].label],
     },
     input: {
       default: [
@@ -56,38 +51,40 @@ const SelectField = React.forwardRef((props, ref) => {
         'text-gray-600',
         'w-full',
         size ? sizes[size].input : sizes['normal'].input,
-        touched && error ? 'border-red-300': 'border-gray-300'
+        touched && error ? 'border-red-300' : 'border-gray-300',
       ],
-      focus: [
-        'border-blue-300',
-      ]
+      focus: ['border-blue-300'],
     },
     errorMessage: {
-      default: [
-        'block',
-        'mt-1',
-        'text-sm',
-        'text-red-500',
-      ]
-    }
+      default: ['block', 'mt-1', 'text-sm', 'text-red-500'],
+    },
   }
 
-  return (<div className={cn(styles.wrapper)}>
-    {label && <label className={cn(styles.label)}>{label}</label>}
-    <select ref={ref} className={cn(styles.input)} {...rest}>
-      <option value='' hidden>{options.length === 0 ? 'Load options...' : placeholder}</option>
-      {options.map(({ key, label }) => (
-        <option key={key} value={key}>{label}</option>
-      ))}
-    </select>
-    {touched && error && <span className={cn(styles.errorMessage)}>{error}</span>}
-  </div>)
+  return (
+    <div className={cn(styles.wrapper)}>
+      {label && <label className={cn(styles.label)}>{label}</label>}
+      <select ref={ref} className={cn(styles.input)} {...rest}>
+        <option value="" hidden>
+          {options.length === 0 ? 'Load options...' : placeholder}
+        </option>
+        {options.map(option => (
+          <option
+            key={option[optionKeyRef] || option.id}
+            value={option[optionValueRef] || option.id}
+          >
+            {option[optionPlaceholderRef] || option.name}
+          </option>
+        ))}
+      </select>
+      {touched && error && <span className={cn(styles.errorMessage)}>{error}</span>}
+    </div>
+  )
 })
 
-const FormikSelectField = ({label, ...rest}) => {
+const FormikSelectField = ({ ...rest }) => {
   const [field, meta] = useField(rest)
 
-  return (<SelectField label={label} {...field} {...meta} {...rest}/>)
+  return <SelectField label={rest.label} {...field} {...meta} {...rest} />
 }
 
 export { SelectField, FormikSelectField }
