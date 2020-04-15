@@ -6,6 +6,7 @@ import Table from '../components/Table'
 import defaultImage from '../static/images/no-image.png'
 import { NavLink } from 'react-router-dom'
 import { IoMdOpen } from 'react-icons/io'
+import { privateApi, url } from '../utils/request'
 
 const DashboardPage = () => {
   const [plantTableData, setPlantTableData] = useState({ data: [], meta: {} })
@@ -22,17 +23,27 @@ const DashboardPage = () => {
     {
       key: 'name',
       label: 'Name',
-      render: ({ name, image_url }) => (
+      render: ({ name, picture }) => (
         <div className="flex items-center w-auto">
-          <img src={image_url || defaultImage} className="w-10 h-10 mr-3 rounded-full" alt="" />
+          <img src={url(`static/images/plants/${picture}`) || defaultImage} className="w-10 h-10 mr-3 rounded-full" alt="" />
           <span>{name}</span>
         </div>
       ),
     },
     {
+      key: 'price',
+      label: 'Price',
+      render: ({ price }) => price,
+    },
+    {
       key: 'category',
       label: 'Category',
-      render: ({ category: { label } }) => label,
+      render: ({ category: { name } }) => name,
+    },
+    {
+      key: 'room',
+      label: 'Room',
+      render: ({ room: { name } }) => name,
     },
     {
       key: 'stock',
@@ -53,51 +64,35 @@ const DashboardPage = () => {
   ]
 
   async function onLoadPlants() {
-    const data = []
-
     setIsLoading(true)
-    const docs = await db.collection('plants').orderBy('name', 'asc').get()
 
-    docs.forEach(doc => {
-      data.push({
-        id: doc.id,
-        ...doc.data(),
-      })
-    })
+    const response = await privateApi().get('plants')
 
-    const newData = data.slice(0, 7)
-
-    const newTableData = {
-      meta: { count: newData.length },
-      data: newData,
+    if (response && response.data.data) {
+      const data = response.data.data
+      const newTableData = {
+        meta: { count: data.length },
+        data,
+      }
+      setIsLoading(false)
+      setPlantTableData(newTableData)
     }
-
-    if (newTableData) setIsLoading(false)
-    setPlantTableData({ ...newTableData })
   }
 
   async function onLoadCategories() {
-    const data = []
-
     setIsLoading(true)
-    const docs = await db.collection('categories').orderBy('name', 'asc').get()
 
-    docs.forEach(doc => {
-      data.push({
-        id: doc.id,
-        ...doc.data(),
-      })
-    })
+    const response = await privateApi().get('categories')
 
-    const newData = data.slice(0, 7)
-
-    const newTableData = {
-      meta: { count: newData.length },
-      data: newData,
+    if (response && response.data.data) {
+      const data = response.data.data
+      const newTableData = {
+        meta: { count: data.length },
+        data,
+      }
+      setIsLoading(false)
+      setCategoryTableData(newTableData)
     }
-
-    if (newTableData) setIsLoading(false)
-    setCategoryTableData({ ...newTableData })
   }
 
   return (
